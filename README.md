@@ -22,6 +22,9 @@
 
 # 👋 What's Litho
 
+[![Run in Smithery](https://smithery.ai/badge/skills/sopaco)](https://smithery.ai/skills?ns=sopaco&utm_source=github&utm_medium=badge)
+
+
 **Litho** is an AI-powered documentation generation engine that automatically analyzes your source code and generates comprehensive, professional architecture documentation in the C4 model format. No more manual documentation that falls behind code changes - Litho keeps your documentation perfectly in sync with your codebase.
 
 Litho transforms raw code into beautifully structured documentation with context diagrams, container diagrams, component diagrams, and code-level documentation - all automatically generated from your source code.
