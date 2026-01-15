@@ -1,0 +1,17 @@
+name: smart-docs
+description: >
+  AI-powered, plugin-based codebase documentation generator.
+  Produces C4-model architecture documentation, workflows,
+  and deep technical deep dives for large and multi-language codebases.
+
+version: 1.0.0
+author: smart-docs-agent
+
+allowed-tools:
+  - Read
+  - Glob
+  - Write
+  - Bash(tree:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(cloc:*)
