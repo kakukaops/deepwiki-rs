@@ -1,0 +1,64 @@
+name: smart-docs-core
+description: |
+  AI-powered comprehensive codebase documentation orchestrator.
+  Determines project type, scale, and documentation phase, and
+  loads phase-specific documentation skills on demand.
+
+use_when:
+  - Users request documentation for an existing codebase
+  - Users ask to understand project architecture or structure
+  - Users need professional technical documentation generated
+
+phases:
+  - discovery
+  - architecture
+  - generation
+  - diagrams
+  - qa
+
+phase_transition_policy:
+  discovery:
+    goal: Identify project structure, technologies, and entry points
+    next: architecture
+
+  architecture:
+    goal: Infer system architecture and component relationships
+    next: generation
+
+  generation:
+    goal: Produce structured documentation content
+    next: diagrams
+
+  diagrams:
+    goal: Generate architectural and workflow diagrams
+    next: qa
+
+  qa:
+    goal: Validate completeness, consistency, and clarity
+    terminal: true
+
+dispatch_rules:
+  - if phase == discovery:
+      load:
+        - phases/discovery.yaml
+        - languages/* (only after language detection)
+  - if phase == architecture:
+      load:
+        - phases/architecture.yaml
+        - languages/* (already detected)
+  - if phase == generation:
+      load:
+        - phases/generation.yaml
+        - templates/*
+  - if phase == diagrams:
+      load:
+        - phases/diagrams.yaml
+  - if phase == qa:
+      load:
+        - phases/qa.yaml
+        - quality/*
+
+constraints:
+  - core_must_not_contain_domain_rules
+  - core_must_not_contain_templates
+  - core_must_not_contain_language_specific_logic

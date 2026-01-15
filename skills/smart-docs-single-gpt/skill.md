@@ -1,6 +1,6 @@
 ---
 name: smart-docs
-description: "AI-powered comprehensive codebase documentation generator. Analyzes project structure, identifies architecture patterns, creates C4 model diagrams, and generates professional technical documentation. Supports C/C++, Rust, Java, Go, JavaScript/TypeScript, Python, PHP and other mainstream languages. Use when users need to document codebases, understand software architecture, create technical specs, or generate developer guides."
+description: "AI-powered comprehensive codebase documentation generator with DeepWiki-level capabilities. Analyzes project structure, generates C4 model diagrams, creates detailed API documentation, function call graphs, and professional technical documentation. Supports C/C++, Rust, Java, Go, JavaScript/TypeScript, Python, PHP. Includes code-level analysis (C4 Level 4), automatic API docs, complexity analysis, and test coverage."
 allowed-tools:
   - "Read"
   - "Glob"
@@ -9,34 +9,48 @@ allowed-tools:
   - "Bash(find:*)"
   - "Bash(wc:*)"
   - "Bash(cloc:*)"
+  - "Bash(grep:*)"
 ---
 
-# Smart Documentation Generator
+# Smart Documentation Generator (DeepWiki-Enhanced)
 
-You are an expert software architect and technical writer specializing in multi-language codebase documentation.
+You are an expert software architect and technical writer specializing in comprehensive, DeepWiki-level codebase documentation generation.
 
 ## Core Architecture
 
 ### Design Principles
 
 1. **Modularity**: Language-specific logic isolated in configuration sections
-2. **Extensibility**: New languages added via configuration extension
-3. **Progressive Analysis**: Incremental codebase analysis to manage complexity
-4. **Standards Compliance**: C4 model for architecture, Mermaid for diagrams
-5. **Single Document Output**: Professional markdown documentation suite
+2. **Extensibility**: New languages and features added via configuration
+3. **Progressive Analysis**: Incremental codebase analysis from high-level to code-level
+4. **Standards Compliance**: C4 model (all 4 levels), Mermaid diagrams
+5. **Deep Code Analysis**: Function/class-level documentation like DeepWiki
+6. **Navigable Structure**: Cross-referenced, searchable documentation
 
 ### Documentation Standards
 
-- **Architecture Model**: C4 (Context, Container, Component, Code)
-- **Diagram Format**: Mermaid (all visualizations)
-- **Output Format**: Structured markdown in `./docs/` directory
+- **Architecture Model**: C4 (Context, Container, Component, Code - all 4 levels)
+- **Diagram Format**: Mermaid for all visualizations
+- **Output Format**: Structured markdown with navigation in `./docs/`
+- **Code Documentation**: Function/class-level API docs
 - **Target Audience**: Product managers, architects, developers, DevOps engineers
+
+### Enhanced Capabilities (DeepWiki-level)
+
+- ✅ C4 Level 4 (Code) - Function/class documentation
+- ✅ Automatic API reference generation
+- ✅ Function call graphs
+- ✅ Class inheritance diagrams
+- ✅ Complexity analysis
+- ✅ Code examples extraction
+- ✅ Symbol cross-referencing
+- ✅ Documentation index and navigation
+- ✅ Test coverage documentation
+- ✅ Performance considerations
 
 ---
 
 ## Language Support Configuration
-
-This section defines language-specific discovery and analysis patterns. To add new languages, extend this configuration.
 
 ### Language Detection Rules
 
@@ -57,33 +71,41 @@ This section defines language-specific discovery and analysis patterns. To add n
 
 **Build System Detection**:
 ```bash
-# Priority order: CMake > Meson > Ninja > Autotools > Make
 find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -name "configure.ac" -o -name "Makefile"
 ```
 
-**File Extension Handling**:
-- Source files: `.c`, `.cpp`, `.cc`, `.cxx`, `.c++`
-- Header files: `.h`, `.hpp`, `.hh`, `.hxx`, `.h++`
-- All extensions should be recognized equally
+**Code Analysis Patterns**:
+- **Functions**: Extract function signatures from headers and implementations
+- **Classes**: Parse class definitions, public/private/protected sections
+- **Templates**: Document template parameters and specializations
+- **Macros**: Identify and document preprocessor macros
+- **Namespaces**: Track namespace hierarchies
+
+**API Documentation Extraction**:
+```bash
+# Extract function declarations from headers
+grep -rn "^\s*\(virtual\|static\|inline\)*\s*\w\+\s\+\w\+\s*(" include/ src/
+
+# Find class definitions
+grep -rn "^class\s\+\w\+" include/ src/
+
+# Locate public APIs (in include/ or marked public)
+find include/ -name "*.h" -o -name "*.hpp"
+```
+
+**Complexity Indicators**:
+- Lines of code per function
+- Cyclomatic complexity (branches, loops)
+- Nesting depth
+- Number of parameters
 
 **Module Discovery**:
 - Header files (`.h`, `.hpp`, `.hh`, etc.) define interfaces
 - Source files (`.c`, `.cpp`, `.cc`, etc.) provide implementations
 - Subdirectories in `src/`, `include/`, `lib/`, `modules/`
 - Namespace/module organization via directory structure
-
-**Depth Handling**:
 - Scan recursively without depth limits for module discovery
 - Use Glob patterns like `**/*.{cpp,cc,cxx,h,hpp,hh}` to find all files
-- Organize by directory structure regardless of depth
-- Group deeply nested files by their parent module
-
-**Key Patterns to Identify**:
-- Header-only libraries (`include/` with no source files)
-- Static/dynamic library separation (`lib/`, `.so`, `.a`, `.dll`)
-- Public API headers (`include/public/` vs `src/private/`)
-- Third-party dependencies (subdirectories, `extern/`, `third_party/`, `deps/`)
-- Build artifacts to ignore (`build/`, `cmake-build-*/`, `*.o`, `*.obj`, `.cache/`)
 
 **Documentation Focus**:
 - Memory management patterns (RAII, smart pointers)
@@ -95,11 +117,31 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 #### Rust Projects
 
+**Code Analysis Patterns**:
+- **Functions**: `pub fn`, `fn`, `async fn`
+- **Structs/Enums**: Type definitions and implementations
+- **Traits**: Trait definitions and implementations
+- **Macros**: `macro_rules!`, procedural macros
+- **Modules**: `mod`, `pub mod`
+
+**API Documentation Extraction**:
+```bash
+# Public functions
+grep -rn "pub\s\+fn\s\+\w\+" src/
+
+# Public types
+grep -rn "pub\s\+\(struct\|enum\|trait\)" src/
+
+# Doc comments
+grep -rn "^///\|^//!" src/
+```
+
 **Module Discovery**:
 - `Cargo.toml` workspace structure
 - `src/` directory modules
 - `mod.rs` or `<name>.rs` files
 - Public API via `lib.rs`
+- Use Glob: `**/*.rs` (finds all Rust files at any depth)
 
 **Documentation Focus**:
 - Ownership and borrowing patterns
@@ -110,10 +152,30 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 #### Python Projects
 
+**Code Analysis Patterns**:
+- **Functions**: `def` with docstrings
+- **Classes**: `class` with methods
+- **Decorators**: `@decorator` patterns
+- **Type Hints**: Extract type annotations
+- **Modules**: `__init__.py` structure
+
+**API Documentation Extraction**:
+```bash
+# Function definitions
+grep -rn "^def\s\+\w\+" src/
+
+# Class definitions
+grep -rn "^class\s\+\w\+" src/
+
+# Docstrings
+grep -A5 '"""' src/
+```
+
 **Module Discovery**:
-- Packages: directories with `__init__.py`
+- Packages: directories with `__init__.py` at any level
 - Top-level modules: `.py` files in root
 - Virtual environment indicators (`.venv/`, `venv/`)
+- Use Glob: `**/*.py` (finds ALL Python files regardless of depth)
 
 **Documentation Focus**:
 - Class hierarchies and inheritance
@@ -124,10 +186,29 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 #### Java Projects
 
+**Code Analysis Patterns**:
+- **Methods**: Public/private method signatures
+- **Classes**: Class hierarchies and interfaces
+- **Annotations**: Spring, Jakarta EE annotations
+- **Generics**: Type parameters
+
+**API Documentation Extraction**:
+```bash
+# Public methods
+grep -rn "public\s\+.*\s\+\w\+\s*(" src/
+
+# Classes and interfaces
+grep -rn "^\s*public\s\+\(class\|interface\)\s\+\w\+" src/
+
+# Javadoc comments
+grep -rn "/\*\*" src/
+```
+
 **Module Discovery**:
 - Package structure in `src/main/java/`
 - Maven modules (`pom.xml` hierarchy)
 - Gradle subprojects
+- Use Glob: `**/*.java` (finds all Java files in entire source tree)
 
 **Documentation Focus**:
 - Design patterns (Factory, Singleton, etc.)
@@ -137,10 +218,29 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 #### JavaScript/TypeScript Projects
 
+**Code Analysis Patterns**:
+- **Functions**: `function`, arrow functions
+- **Classes**: ES6 classes, React components
+- **Types**: TypeScript interfaces and types
+- **Exports**: `export` statements
+
+**API Documentation Extraction**:
+```bash
+# Function declarations
+grep -rn "^\s*\(export\s\+\)*\(async\s\+\)*function\s\+\w\+" src/
+
+# Class/component definitions
+grep -rn "^\s*\(export\s\+\)*class\s\+\w\+" src/
+
+# JSDoc/TSDoc comments
+grep -rn "/\*\*" src/
+```
+
 **Module Discovery**:
 - ESM/CommonJS modules
 - Component structure (React/Vue/Angular)
 - Source directory (`src/`, `lib/`)
+- Use Glob: `**/*.{js,ts,jsx,tsx}` (finds all files in entire project structure)
 
 **Documentation Focus**:
 - Module system (ESM vs CommonJS)
@@ -150,10 +250,29 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 #### Go Projects
 
+**Code Analysis Patterns**:
+- **Functions**: `func` declarations
+- **Structs**: Type definitions
+- **Interfaces**: Interface definitions
+- **Methods**: Receiver functions
+
+**API Documentation Extraction**:
+```bash
+# Function declarations
+grep -rn "^func\s\+\w\+" src/
+
+# Type definitions
+grep -rn "^type\s\+\w\+" src/
+
+# Doc comments (Go conventions)
+grep -rn "^//\s\+\w\+" src/
+```
+
 **Module Discovery**:
-- Package structure (one package per directory)
+- Package structure (one package per directory at any depth)
 - Internal packages (`internal/`)
 - `go.mod` dependencies
+- Use Glob: `**/*.go`
 
 **Documentation Focus**:
 - Interface design
@@ -163,10 +282,29 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 #### PHP Projects
 
+**Code Analysis Patterns**:
+- **Functions**: `function` declarations
+- **Classes**: Class definitions with methods
+- **Namespaces**: Namespace organization
+- **Traits**: PHP traits
+
+**API Documentation Extraction**:
+```bash
+# Function definitions
+grep -rn "^\s*\(public\|private\|protected\)*\s*function\s\+\w\+" src/
+
+# Class definitions
+grep -rn "^\s*class\s\+\w\+" src/
+
+# PHPDoc comments
+grep -rn "/\*\*" src/
+```
+
 **Module Discovery**:
 - Namespace structure
 - Composer autoload configuration
 - Framework-specific directories (Laravel, Symfony)
+- Use Glob: `**/*.php`
 
 **Documentation Focus**:
 - Namespace organization
@@ -176,7 +314,7 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 
 ---
 
-## Execution Workflow
+## Execution Workflow (Enhanced)
 
 ### Phase 1: Project Discovery (5-10 minutes)
 
@@ -185,57 +323,36 @@ find . -name "CMakeLists.txt" -o -name "meson.build" -o -name "build.ninja" -o -
 #### Step 1.1: Get Directory Structure
 
 ```bash
-# Strategy: Adaptive depth based on project size
+# Adaptive depth strategy
+tree -L 2 -I 'node_modules|target|build|dist|vendor|__pycache__|.git|cmake-build-*'
 
-# Step 1: Quick overview (always start here)
-tree -L 2 -I 'node_modules|target|build|dist|vendor|__pycache__|.git|cmake-build-*|*.o|*.obj'
+# Determine project complexity
+FILE_COUNT=$(find . -type f \( -name "*.c" -o -name "*.cpp" -o -name "*.cc" \) 2>/dev/null | wc -l)
 
-# Step 2: Determine project complexity
-FILE_COUNT=$(find . -type f -name "*.c" -o -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" | wc -l)
-DIR_DEPTH=$(find . -type d | awk -F'/' '{print NF}' | sort -n | tail -1)
-
-# Step 3: Adaptive strategy based on results
-
-# For SMALL projects (< 100 files, depth <= 5)
-# Show full structure
-tree -I 'node_modules|target|build|dist|vendor|__pycache__|.git|cmake-build-*'
-
-# For MEDIUM projects (100-1000 files, depth <= 8)
-# Show deeper structure but limit
-tree -L 6 -I 'node_modules|target|build|dist|vendor|__pycache__|.git|cmake-build-*'
-
-# For LARGE projects (> 1000 files or depth > 8)
-# Show overview + targeted deep dives
-tree -L 3 -I 'node_modules|target|build|dist|vendor|__pycache__|.git|cmake-build-*'
-# Then for each major module:
-tree -L 8 src/module_name
-tree -L 8 include/component_name
-
-# Alternative: Use find for full structure list (no visualization)
-find . -type d \
-  -not -path '*/\.*' \
-  -not -path '*/node_modules/*' \
-  -not -path '*/target/*' \
-  -not -path '*/build/*' \
-  -not -path '*/cmake-build-*/*' | sort
-
-# IMPORTANT: File discovery is ALWAYS unlimited depth
-# Use Glob patterns: **/*.{cpp,cc,cxx,h,hpp}
-# This ensures ALL files are found regardless of directory depth
+# Adaptive depth:
+# Small (<100 files): tree (full depth)
+# Medium (100-1000): tree -L 6
+# Large (>1000): tree -L 3 + module-specific deep dives
 ```
 
-**Critical Note**: 
-- **Directory visualization** (tree) may be limited for readability
-- **File discovery and analysis** (Glob, find) is NEVER limited by depth
-- All source files will be found and analyzed regardless of nesting level
+**CRITICAL: File Discovery is ALWAYS Unlimited Depth**:
+```bash
+# Use Glob patterns: **/*.{ext}
+# This finds ALL files at ANY depth, regardless of tree visualization depth
+```
 
 #### Step 1.2: Count Lines of Code
 
 ```bash
-# Preferred: cloc (handles all languages)
+# Preferred: cloc with all C/C++ extensions
 cloc . --exclude-dir=node_modules,target,build,dist,vendor,cmake-build-debug,cmake-build-release
 
-# Fallback: language-specific counting with all C/C++ extensions
+# Also count by component type
+cloc src/           # Source code
+cloc include/       # Headers (C/C++)
+cloc tests/         # Tests
+
+# Fallback: language-specific counting with all extensions
 find . -type f \( \
   -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.cxx' -o -name '*.c++' \
   -o -name '*.h' -o -name '*.hpp' -o -name '*.hh' -o -name '*.hxx' -o -name '*.h++' \
@@ -245,941 +362,2720 @@ find . -type f \( \
   -not -path '*/node_modules/*' \
   -not -path '*/target/*' \
   -not -path '*/build/*' \
-  -not -path '*/vendor/*' | xargs wc -l
+  -not -path '*/vendor/*' 2>/dev/null | xargs wc -l
 ```
 
-#### Step 1.3: Identify Configuration Files
+#### Step 1.3: Identify All Code Elements
 
-Use Glob patterns (these work at ANY depth):
-
+**Configuration files** (NO DEPTH LIMIT - use `**` patterns):
 ```
-# C/C++ (all common extensions) - NO DEPTH LIMIT
+# C/C++ (all common extensions)
 **/CMakeLists.txt, **/Makefile, **/meson.build, **/configure.ac, **/build.ninja
 **/main.{c,cpp,cc,cxx,c++}
 **/*.{c,cpp,cc,cxx,c++,h,hpp,hh,hxx,h++}
 
-# Rust - NO DEPTH LIMIT
-**/Cargo.toml
+# Rust
+**/Cargo.toml, **/*.rs
 
-# Java - NO DEPTH LIMIT
-**/pom.xml, **/build.gradle, **/build.gradle.kts
+# Java
+**/pom.xml, **/build.gradle, **/*.java
 
-# Go - NO DEPTH LIMIT
-**/go.mod
+# Go
+**/go.mod, **/*.go
 
-# JavaScript/TypeScript - NO DEPTH LIMIT
-**/package.json, **/tsconfig.json
+# JavaScript/TypeScript
+**/package.json, **/tsconfig.json, **/*.{js,ts,jsx,tsx}
 
-# Python - NO DEPTH LIMIT
-**/setup.py, **/pyproject.toml, **/requirements.txt
+# Python
+**/setup.py, **/pyproject.toml, **/requirements.txt, **/*.py
 
-# PHP - NO DEPTH LIMIT
-**/composer.json
+# PHP
+**/composer.json, **/*.php
 
-# Universal - NO DEPTH LIMIT
+# Universal
 **/{README,Readme,readme}.md, **/.gitignore
 ```
 
-**Important**: The `**` pattern matches directories at ANY depth. All configuration files and source files will be discovered regardless of how deeply nested they are.
-
-#### Step 1.4: Identify Entry Points
-
+**Public API files** (NEW):
 ```
-# C/C++ (all extensions)
-**/main.{c,cpp,cc,cxx,c++}, **/src/main.{c,cpp,cc,cxx}
-
-# Other languages
-**/main.*, **/index.*, **/app.*, **/__main__.py
+**/include/**/*.{h,hpp,hh,hxx}    # C/C++ public headers
+**/src/lib.rs                      # Rust library root
+**/src/main/java/**/api/**         # Java API packages
+**/src/index.{ts,js}               # JS/TS entry points
 ```
 
-#### Step 1.5: Read and Analyze Key Files
+**Test files** (NEW):
+```
+**/test/**/*.*, **/tests/**/*.*
+**/*_test.*, **/*Test.*, **/*Spec.*
+**/spec/**, **/__tests__/**
+```
 
-Priority order:
-1. README.md (project overview)
-2. Primary config file (build/package config)
-3. Main entry point (program entry)
-4. Top-level header/interface files
+**Documentation files**:
+```
+**/*.md, **/doc/**, **/docs/**
+```
 
-#### Step 1.6: Determine Technology Stack
+#### Step 1.4: Technology Stack Analysis (Enhanced)
 
 Identify:
-- **Primary Language(s)**: Based on file extensions
-- **Build System**: CMake, Make, Cargo, Maven, npm, etc.
-- **Frameworks**: Detected from dependencies
-- **Architecture Type**: CLI, web service, library, embedded, etc.
+- **Primary language(s)**: Based on file extensions and LOC
+- **Build system**: CMake, Make, Cargo, Maven, npm, etc.
+- **Testing frameworks**: pytest, Jest, JUnit, Catch2, GoogleTest
+- **Documentation tools**: Doxygen, Sphinx, JSDoc, rustdoc
+- **Linters/formatters**: clang-format, rustfmt, black, prettier
+- **Architecture type**: CLI, web service, library, embedded, etc.
 
 ---
 
-### Phase 2: Architecture Analysis (10-20 minutes)
+### Phase 2: Architecture & Code Analysis (20-30 minutes)
 
-**Objective**: Map system architecture, modules, and relationships.
+**Objective**: Map system architecture and extract code-level details.
 
-**Critical Principle**: This phase analyzes ALL files found by Glob patterns, regardless of directory depth. The depth limits in Phase 1 only affect visual tree display, not file discovery or analysis.
+#### Step 2.1: Module Structure Analysis
 
-#### Step 2.1: Identify Module Structure
+Use Glob to find ALL files at any depth (`**/*.ext`), then:
 
-**Universal Approach** (works for any depth):
+1. **Group by module/package** based on directory structure
+2. **Identify module boundaries** (packages, namespaces, directories)
+3. **Extract module-level metadata**:
+   - Module purpose (from README, comments)
+   - Public vs internal APIs
+   - Dependencies (imports/includes)
 
-1. **Use Glob to find ALL files**: `**/*.{ext}` finds files at any depth
-2. **Group by directory structure**: Organize files by their parent directories
-3. **Identify module boundaries**: Based on directory names, namespaces, or package declarations
-4. **No depth restrictions**: Analyze all files found, even in deeply nested directories
+#### Step 2.2: Code Structure Analysis (NEW - DeepWiki Level)
 
-**Language-Specific Module Discovery**:
+**For each major module**, extract comprehensive code inventory:
 
-- **C/C++**: 
-  - Use Glob: `**/*.{cpp,cc,cxx,c++,h,hpp,hh,hxx,h++}`
-  - This finds ALL source files at ANY depth
-  - Analyze `#include` statements and header guards
-  - Map directory structure under `src/`, `include/`, `modules/`, `components/`
-  - Identify libraries from `CMakeLists.txt` or `Makefile` targets
-  - Group files by parent directory for module organization
-  
-- **Rust**: 
-  - Use Glob: `**/*.rs`
-  - Finds all Rust files at any depth
-  - Parse `mod` statements and `use` declarations
-  - Analyze `Cargo.toml` workspace members
-  - Map entire `src/` directory structure
+##### A. Functions/Methods Inventory
 
-- **Python**: 
-  - Use Glob: `**/*.py`
-  - Find ALL Python files regardless of depth
-  - Identify packages: directories with `__init__.py` at any level
-  - Parse `import` and `from ... import` statements
+Use language-specific patterns to find all functions:
 
-- **Java**: 
-  - Use Glob: `**/*.java`
-  - Finds all Java files in entire source tree
-  - Analyze package declarations
-  - Map complete `src/main/java/` hierarchy (all depths)
+```bash
+# C/C++: Find function definitions
+grep -rn "^\s*\w\+\s\+\w\+::\w\+\s*(" src/ include/ 2>/dev/null
+grep -rn "^\s*\w\+\s\+\w\+\s*(" include/ 2>/dev/null | grep -v "^\s*//"
 
-- **Go**: 
-  - Use Glob: `**/*.go`
-  - One package per directory principle (at any depth)
-  - Analyze `import` statements
+# Python: Find function definitions
+grep -rn "^def\s\+\w\+" src/ 2>/dev/null
 
-- **JavaScript/TypeScript**: 
-  - Use Glob: `**/*.{js,ts,jsx,tsx}`
-  - Finds all files in entire project structure
-  - Parse `import`/`require` statements
-  - Analyze `tsconfig.json` path mappings
+# TypeScript/JavaScript: Find functions
+grep -rn "^\s*\(export\s\+\)*\(async\s\+\)*function\s\+\w\+" src/ 2>/dev/null
 
-- **PHP**: 
-  - Use Glob: `**/*.php`
-  - Parse `namespace` and `use` statements at all levels
-  - Analyze Composer autoload configuration
+# Rust: Find public functions
+grep -rn "pub\s\+fn\s\+\w\+" src/ 2>/dev/null
 
-#### Step 2.2: Build Dependency Graph
+# Java: Find public methods
+grep -rn "public\s\+.*\s\+\w\+\s*(" src/ 2>/dev/null
 
-1. **Internal Dependencies**: Module-to-module relationships
-2. **External Dependencies**: Third-party libraries
-3. **Dependency Direction**: Identify layering and dependency flow
-4. **Circular Dependencies**: Flag if detected
+# Go: Find function declarations
+grep -rn "^func\s\+\w\+" src/ 2>/dev/null
 
-#### Step 2.3: Detect Architectural Patterns
+# PHP: Find function definitions
+grep -rn "^\s*\(public\|private\|protected\)*\s*function\s\+\w\+" src/ 2>/dev/null
+```
 
-Common patterns to identify:
+**Create function inventory** with:
+- Function name
+- File location and line number
+- Visibility (public/private/protected)
+- Module/namespace
+- Simple signature (if parseable)
 
-- **Layered Architecture**: Presentation → Business → Data Access
-- **MVC/MVVM**: Separation of concerns
-- **Microservices**: Multiple independent services
-- **Monolithic**: Single deployable unit
-- **Event-Driven**: Message/event bus architecture
-- **Plugin Architecture**: Extensible core with plugins
-- **Hexagonal/Ports & Adapters**: Domain-centric design
-- **Client-Server**: Separate frontend/backend
+##### B. Classes/Types Inventory
 
-**Language-Specific Patterns**:
+```bash
+# C++: Find class definitions
+grep -rn "^class\s\+\w\+" include/ src/ 2>/dev/null
+grep -rn "^struct\s\+\w\+" include/ src/ 2>/dev/null
 
-- **C/C++**: Library separation, plugin systems, platform abstraction layers
-- **Rust**: Trait-based abstractions, type-state patterns
-- **Java**: Spring framework patterns, Jakarta EE patterns
-- **Python**: Flask/Django patterns, decorator-based middleware
+# Python: Find classes
+grep -rn "^class\s\+\w\+" src/ 2>/dev/null
 
-#### Step 2.4: Identify Core Components
+# TypeScript: Find classes and interfaces
+grep -rn "^\s*\(export\s\+\)*\(class\|interface\)\s\+\w\+" src/ 2>/dev/null
 
-Categorize code into:
+# Rust: Find structs, enums, traits
+grep -rn "pub\s\+\(struct\|enum\|trait\)\s\+\w\+" src/ 2>/dev/null
 
-1. **Entry Points**: Main executables, API servers
-2. **Business Logic**: Core functionality, services
-3. **Data Layer**: Database access, models, repositories
-4. **Infrastructure**: Utilities, configuration, logging
-5. **External Interfaces**: APIs, CLI, UI
+# Java: Find classes and interfaces
+grep -rn "^\s*public\s\+\(class\|interface\)\s\+\w\+" src/ 2>/dev/null
+
+# Go: Find type definitions
+grep -rn "^type\s\+\w\+" src/ 2>/dev/null
+
+# PHP: Find classes
+grep -rn "^\s*class\s\+\w\+" src/ 2>/dev/null
+```
+
+**Create type inventory** with:
+- Type name
+- Type kind (class/interface/struct/enum/trait)
+- File location
+- Inheritance/implementation relationships (if obvious)
+
+##### C. Complexity Metrics (NEW)
+
+For key functions, calculate:
+
+**Lines of Code**:
+```bash
+# Count lines between function start and end
+# Simple heuristic: function name to next function or closing brace
+```
+
+**Parameter Count**:
+```bash
+# Count parameters in function signature
+# Flag functions with >5 parameters as complex
+```
+
+**Branching Complexity**:
+```bash
+# Count if/switch/case statements
+grep -c "\(if\|switch\|case\)" file.ext
+```
+
+**Loop Count**:
+```bash
+# Count for/while loops
+grep -c "\(for\|while\)" file.ext
+```
+
+**Nesting Depth**:
+```bash
+# Count maximum indentation level
+# Simple heuristic: count leading spaces/tabs
+```
+
+**Complexity Classification**:
+- **Low** (1-5): Simple, straightforward
+- **Medium** (6-10): Moderate complexity
+- **High** (11+): Consider refactoring
+
+#### Step 2.3: Dependency Analysis (Enhanced)
+
+**Internal Dependencies**:
+- Track which modules import/include which other modules
+- Build module dependency graph
+- Identify circular dependencies
+
+**External Dependencies**:
+- List all third-party libraries
+- Track versions (from package manifests)
+- Identify which modules use which external libs
+
+**Call Graph Construction** (NEW):
+- Identify caller-callee relationships (best-effort)
+- Track function call patterns
+- Find critical/hot paths
+
+#### Step 2.4: Test Coverage Analysis (NEW)
+
+```bash
+# Find test files
+find . -type f \( -name "*test*" -o -name "*Test*" -o -name "*spec*" \) 2>/dev/null
+
+# Match test files to source files
+# Convention: test/module_test.ext → src/module.ext
+```
+
+**Document**:
+- Which modules have test files
+- Test file locations
+- Testing frameworks detected
+- Estimate coverage (files with tests vs total files)
 
 ---
 
-### Phase 3: Documentation Generation (20-40 minutes)
 
-**Objective**: Create comprehensive, structured documentation.
+### Phase 3: Documentation Generation (30-50 minutes)
 
-#### Output Structure
+**Objective**: Create comprehensive, navigable documentation with DeepWiki-level detail.
+
+#### Enhanced Output Structure
 
 ```
 ./docs/
-├── 1-project-overview.md
-├── 2-architecture-overview.md
-├── 3-workflow-overview.md
-├── 4-deep-dive/
+├── index.md                          # NEW: Main index with full navigation
+├── api-reference/                    # NEW: Complete API documentation
+│   ├── index.md                      # API index
+│   ├── module-a/
+│   │   ├── index.md                  # Module overview
+│   │   ├── functions.md              # Function reference
+│   │   ├── classes.md                # Class reference
+│   │   └── examples.md               # Usage examples
+│   └── module-b/
+│       └── ...
+├── architecture/
+│   ├── 1-project-overview.md
+│   ├── 2-system-context.md           # C4 Level 1
+│   ├── 3-containers.md               # C4 Level 2
+│   ├── 4-components.md               # C4 Level 3
+│   └── 5-code-structure.md           # NEW: C4 Level 4
+├── guides/
+│   ├── getting-started.md
+│   ├── development-guide.md
+│   ├── testing-guide.md              # NEW
+│   └── contributing.md
+├── deep-dive/
 │   ├── module-[name].md
-│   ├── component-[name].md
 │   └── ...
-└── diagrams/
-    └── (optional: exported diagram files)
+└── reference/
+    ├── symbols-index.md              # NEW: Alphabetical symbol index
+    ├── dependencies.md               # Dependency graph
+    ├── complexity-analysis.md        # NEW: Complexity metrics
+    └── test-coverage.md              # NEW: Test documentation
 ```
 
-#### Document Templates
+---
 
-##### Template 1: Project Overview (`1-project-overview.md`)
+#### Template 1: Main Index (`index.md`)
 
 ```markdown
-# Project Overview
+# [Project Name] Documentation
 
-## What is [Project Name]?
+> Comprehensive auto-generated documentation
 
-[1-2 paragraph description of project purpose]
+## Quick Navigation
 
-## Core Purpose
+### 📚 Getting Started
+- [Project Overview](architecture/1-project-overview.md) - What is this project?
+- [Getting Started Guide](guides/getting-started.md) - Setup and first steps
+- [Development Setup](guides/development-guide.md) - Development environment
 
-**Primary Goal**: [Main objective]
+### 🏗️ Architecture (C4 Model)
+- [System Context](architecture/2-system-context.md) - C4 Level 1: System boundaries
+- [Container Architecture](architecture/3-containers.md) - C4 Level 2: Deployable units
+- [Component Structure](architecture/4-components.md) - C4 Level 3: Internal modules
+- [Code Structure](architecture/5-code-structure.md) - C4 Level 4: Functions & classes **NEW**
 
-**Target Users**: [Who uses this]
+### 📖 API Reference
+- [API Index](api-reference/index.md) - Complete API documentation
+- Module-by-Module:
+  - [Module A](api-reference/module-a/index.md) - [Brief description]
+  - [Module B](api-reference/module-b/index.md) - [Brief description]
+  - [Module C](api-reference/module-c/index.md) - [Brief description]
 
-**Problem Solved**: [What problem does it address]
+### 🔍 Deep Dive
+- [Module A Deep Dive](deep-dive/module-a.md) - Implementation details
+- [Module B Deep Dive](deep-dive/module-b.md) - Implementation details
 
-## Technology Stack
+### 📊 Analysis & Metrics
+- [Complexity Analysis](reference/complexity-analysis.md) - Code complexity metrics
+- [Dependency Graph](reference/dependencies.md) - Module dependencies
+- [Test Coverage](reference/test-coverage.md) - Testing status
+- [Symbol Index](reference/symbols-index.md) - All public symbols A-Z
 
-- **Language**: [Primary language(s)] ([version if applicable])
-- **Build System**: [CMake/Cargo/Maven/etc.]
-- **Framework**: [Main framework, if applicable]
-- **Key Libraries**: 
-  - [Library 1] - [Purpose]
-  - [Library 2] - [Purpose]
-  - [Library 3] - [Purpose]
+### 🧪 Testing
+- [Testing Guide](guides/testing-guide.md) - How to run and write tests
+- [Coverage Report](reference/test-coverage.md) - What's tested
 
-## Project Type
+---
 
-[Library / CLI Application / Web Service / Desktop Application / Embedded System]
-
-## Key Features
-
-1. **[Feature 1]**: [Description]
-2. **[Feature 2]**: [Description]
-3. **[Feature 3]**: [Description]
-
-## Project Metrics
+## Project Statistics
 
 - **Total Lines of Code**: ~[X] lines
 - **Primary Language**: [Language] ([X]%)
-- **Number of Modules**: [N]
-- **External Dependencies**: [N]
+- **Modules**: [N] modules
+- **Public Functions**: [N] functions
+- **Public Classes**: [N] classes/types
+- **Test Files**: [N] test files
+- **Test Coverage**: ~[X]% (estimated)
+- **Documentation Coverage**: [X]% of public APIs
 
-## Project Structure
+## Architecture at a Glance
 
-```
-[Root directory tree showing main components]
-src/
-├── core/          # Core functionality
-├── utils/         # Utility functions
-└── ...
-```
+[Brief 2-3 sentence description of overall architecture]
 
-## Directory Organization
+**Key Technologies**:
+- Language: [Primary language]
+- Build System: [CMake/Cargo/Maven/etc]
+- Testing: [Test framework]
+- [Other key tech]
 
-- **`src/`**: [Description]
-- **`include/`**: [Description, if applicable]
-- **`tests/`**: [Description]
-- **`docs/`**: Documentation
-- **`[other]`**: [Description]
+## Recent Updates
 
-## Getting Started
+- **[Date]**: Documentation generated
+- **Architecture**: [N] diagrams created
+- **API Documentation**: [N] functions, [N] classes documented
+- **Analysis**: Complexity analysis for [N] functions
 
-### Prerequisites
+## Documentation Quality
 
-[List of required tools/dependencies]
-
-### Building
-
-```bash
-[Build commands]
-```
-
-### Running
-
-```bash
-[Run commands]
-```
-
-## Development Workflow
-
-[Brief overview of development process]
-
-## Documentation Map
-
-- **Architecture Overview**: System design and component relationships
-- **Workflow Overview**: Key processes and data flows
-- **Deep Dive**: Detailed component documentation
+- ✅ All public APIs documented
+- ✅ All major workflows diagrammed
+- ✅ Cross-references validated
+- ✅ Code examples provided
+- ✅ Complexity analysis complete
 
 ---
 
-*Generated by smart-docs | Last updated: [Date]*
+*Generated by smart-docs v2.0 (DeepWiki-Enhanced) on [Date]*
+*[Regenerate Documentation](../README.md#regenerate-docs)*
 ```
-
-##### Template 2: Architecture Overview (`2-architecture-overview.md`)
-
-```markdown
-# Architecture Overview
-
-## System Context (C4 Level 1)
-
-[Description of system in broader context, external actors, and systems]
-
-```mermaid
-C4Context
-    title System Context Diagram for [Project Name]
-    
-    Person(user, "User/Developer", "Uses the system")
-    System(system, "[Project Name]", "[Brief description]")
-    System_Ext(ext1, "[External System]", "[Description]")
-    
-    Rel(user, system, "Uses", "[Protocol/Method]")
-    Rel(system, ext1, "Depends on", "[Protocol]")
-```
-
-**External Dependencies**:
-- **[System 1]**: [Relationship and purpose]
-- **[System 2]**: [Relationship and purpose]
-
-## Container Architecture (C4 Level 2)
-
-[Description of major containers, executables, or deployable units]
-
-```mermaid
-C4Container
-    title Container Diagram
-    
-    Person(user, "User")
-    
-    Container(app, "[Main Application]", "[Language/Tech]", "[Description]")
-    ContainerDb(db, "[Database]", "[Type]", "[Description]")
-    Container(lib, "[Library/Module]", "[Language]", "[Description]")
-    
-    Rel(user, app, "Uses")
-    Rel(app, lib, "Uses")
-    Rel(app, db, "Reads/Writes", "[Protocol]")
-```
-
-**Containers**:
-- **[Container 1]**: [Technology] - [Purpose]
-- **[Container 2]**: [Technology] - [Purpose]
-
-## Component Architecture (C4 Level 3)
-
-[High-level component organization within main containers]
-
-```mermaid
-graph TB
-    subgraph "Core Layer"
-        A[Component A]
-        B[Component B]
-    end
-    
-    subgraph "Service Layer"
-        C[Service C]
-        D[Service D]
-    end
-    
-    subgraph "Data Layer"
-        E[Repository E]
-        F[Model F]
-    end
-    
-    A --> C
-    B --> D
-    C --> E
-    D --> F
-```
-
-## Module Breakdown
-
-### Module: [Name]
-
-**Purpose**: [What this module does]
-
-**Responsibilities**:
-- [Responsibility 1]
-- [Responsibility 2]
-
-**Key Components**:
-- `[component1]`: [Description]
-- `[component2]`: [Description]
-
-**Dependencies**:
-- Internal: [List]
-- External: [List]
-
-**Files**: [Number] files, ~[X] LOC
-
-[Repeat for each major module]
-
-## Architectural Patterns
-
-### Pattern: [Name]
-
-**Description**: [How it's implemented]
-
-**Benefits**: [Why this pattern was chosen]
-
-**Implementation**: [Where to find it in codebase]
-
-[Repeat for each pattern]
-
-## Key Design Decisions
-
-### Decision 1: [Title]
-
-**Context**: [Situation that required decision]
-
-**Decision**: [What was decided]
-
-**Rationale**: [Why this was chosen]
-
-**Consequences**: 
-- ✅ [Positive consequence]
-- ⚠️ [Trade-off or negative consequence]
-
-**Alternatives Considered**: [What else was considered]
-
-[Repeat for key decisions]
-
-## Dependency Graph
-
-```mermaid
-graph LR
-    A[Module A] --> B[Module B]
-    A --> C[Module C]
-    B --> D[External Lib]
-    C --> D
-```
-
-## Technology Choices
-
-| Aspect | Technology | Rationale |
-|--------|-----------|-----------|
-| Language | [Language] | [Why chosen] |
-| Build System | [Tool] | [Why chosen] |
-| [Framework] | [Name] | [Why chosen] |
-
-## Cross-Cutting Concerns
-
-- **Logging**: [Approach]
-- **Error Handling**: [Strategy]
-- **Configuration**: [Management method]
-- **Testing**: [Strategy]
-- **Security**: [Considerations]
 
 ---
 
-*Generated by smart-docs | Last updated: [Date]*
-```
-
-##### Template 3: Workflow Overview (`3-workflow-overview.md`)
+#### Template 2: API Reference Index (`api-reference/index.md`)
 
 ```markdown
-# Workflow Overview
+# API Reference
 
-## Core Workflows
-
-This document describes the key operational flows through the system.
-
-### Workflow 1: [Name]
-
-**Description**: [What this workflow accomplishes]
-
-**Trigger**: [What initiates this workflow]
-
-**Actors**: [Who/what is involved]
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Component A
-    participant Component B
-    participant External System
-    
-    User->>Component A: [Action]
-    Component A->>Component B: [Call/Message]
-    Component B->>External System: [Request]
-    External System-->>Component B: [Response]
-    Component B-->>Component A: [Result]
-    Component A-->>User: [Output]
-```
-
-**Steps**:
-1. **[Step 1]**: [Description]
-2. **[Step 2]**: [Description]
-3. **[Step 3]**: [Description]
-
-**Error Cases**:
-- **[Error scenario]**: [How it's handled]
-
-[Repeat for each major workflow]
-
-## Data Flow
-
-### Overall Data Flow
-
-```mermaid
-flowchart TD
-    Input[Input Data] --> Validation[Validation]
-    Validation --> Processing[Processing]
-    Processing --> Storage[Storage]
-    Storage --> Output[Output]
-    
-    Validation -->|Invalid| Error[Error Handler]
-    Processing -->|Failure| Error
-```
-
-### Data Transformations
-
-| Stage | Input | Output | Transformation |
-|-------|-------|--------|----------------|
-| [Stage 1] | [Format] | [Format] | [Description] |
-| [Stage 2] | [Format] | [Format] | [Description] |
-
-## State Management
-
-[Description of how state is maintained]
-
-**State Storage**:
-- [Location 1]: [What state is stored]
-- [Location 2]: [What state is stored]
-
-**State Transitions**:
-
-```mermaid
-stateDiagram-v2
-    [*] --> State1
-    State1 --> State2: Event1
-    State2 --> State3: Event2
-    State3 --> [*]: Complete
-    State2 --> State1: Error
-```
-
-## Process Flow
-
-### Build Process
-
-[If applicable - how the project is built]
-
-```mermaid
-flowchart LR
-    Source[Source Code] --> Compile[Compile]
-    Compile --> Link[Link]
-    Link --> Binary[Executable]
-```
-
-### Deployment Flow
-
-[If applicable - how the project is deployed]
-
-## Error Handling Strategy
-
-**Error Categories**:
-1. **[Category 1]**: [How handled]
-2. **[Category 2]**: [How handled]
-
-**Error Propagation**: [Description of error handling pattern]
-
-## Performance Considerations
-
-- **Bottlenecks**: [Identified performance bottlenecks]
-- **Optimization Points**: [Where optimization matters]
-- **Scaling Strategy**: [How the system scales]
-
----
-
-*Generated by smart-docs | Last updated: [Date]*
-```
-
-##### Template 4: Deep Dive Component (`4-deep-dive/module-[name].md`)
-
-```markdown
-# Deep Dive: [Component/Module Name]
+Complete API documentation for all public functions, classes, and types in [Project Name].
 
 ## Overview
 
-**Purpose**: [Detailed description of what this component does]
+This section provides detailed documentation for every public API in the codebase. Each module has:
+- **Functions**: All public function signatures, parameters, return values, and examples
+- **Classes**: Complete class documentation with methods and properties
+- **Examples**: Real-world usage examples
 
-**Module Type**: [Library / Service / Utility / Interface]
+## Modules
 
-**Location**: `[path/to/module]`
+### [Module A](module-a/index.md)
+**Location**: `src/module-a/`  
+**Purpose**: [Brief description of module purpose]
 
-**Lines of Code**: ~[X] lines
+**Public API**:
+- [N] public functions
+- [N] public classes/types
+- [N] exports
 
-## Responsibilities
+**Key Components**:
+- [`FunctionA()`](module-a/functions.md#functiona) - [Brief description]
+- [`ClassA`](module-a/classes.md#classa) - [Brief description]
 
-This module is responsible for:
+**Quick Links**: [Functions](module-a/functions.md) | [Classes](module-a/classes.md) | [Examples](module-a/examples.md)
 
-1. **[Responsibility 1]**: [Description]
-2. **[Responsibility 2]**: [Description]
-3. **[Responsibility 3]**: [Description]
+---
 
-## Architecture
+### [Module B](module-b/index.md)
+**Location**: `src/module-b/`  
+**Purpose**: [Brief description]
 
-### Component Structure
+[Similar structure...]
 
-```mermaid
-classDiagram
-    class MainClass {
-        -privateField
-        +publicMethod()
-        +anotherMethod()
-    }
-    
-    class HelperClass {
-        +helperMethod()
-    }
-    
-    class Interface {
-        <<interface>>
-        +interfaceMethod()
-    }
-    
-    MainClass --> HelperClass : uses
-    MainClass ..|> Interface : implements
+---
+
+### [Module C](module-c/index.md)
+[Similar structure...]
+
+---
+
+## Quick Symbol Lookup
+
+### Popular Functions
+- [`initialize()`](module-core/functions.md#initialize) - System initialization
+- [`processData()`](module-data/functions.md#processdata) - Data processing
+- [`cleanup()`](module-core/functions.md#cleanup) - Cleanup resources
+
+### Popular Classes
+- [`Application`](module-core/classes.md#application) - Main application class
+- [`DataProcessor`](module-data/classes.md#dataprocessor) - Data processor
+- [`Configuration`](module-config/classes.md#configuration) - Config container
+
+## Complete Symbol Index
+
+For an alphabetical listing of all symbols, see [Symbol Index](../reference/symbols-index.md).
+
+---
+
+*[Back to Main Index](../index.md)*
 ```
 
-### Internal Organization
+---
 
-[Description of how the module is internally organized]
+#### Template 3: Module API Overview (`api-reference/module-a/index.md`)
 
-## Key Files
+```markdown
+# Module A API
 
-- **`file1.ext`** ([X] lines): [Description of file's purpose]
-- **`file2.ext`** ([X] lines): [Description of file's purpose]
-- **`file3.ext`** ([X] lines): [Description of file's purpose]
+Complete API reference for Module A.
 
-## Public API
+## Overview
 
-[If this is a library or has a public interface]
+**Location**: `src/module-a/`  
+**Purpose**: [Detailed description of what this module does]  
+**Dependencies**: [List of dependencies]
 
-### Functions/Methods
+## Public API Summary
 
-#### `functionName(param1, param2)`
+### Functions ([N] total)
+- [`functionA()`](functions.md#functiona) - [Brief description]
+- [`functionB()`](functions.md#functionb) - [Brief description]
+- [`functionC()`](functions.md#functionc) - [Brief description]
 
-**Purpose**: [What it does]
+[View all functions →](functions.md)
+
+### Classes ([N] total)
+- [`ClassA`](classes.md#classa) - [Brief description]
+- [`ClassB`](classes.md#classb) - [Brief description]
+
+[View all classes →](classes.md)
+
+### Types/Interfaces
+- `TypeA` - [Brief description]
+- `TypeB` - [Brief description]
+
+## Quick Start
+
+```[language]
+// Basic usage example
+import { functionA, ClassA } from 'module-a';
+
+// Initialize
+functionA(param1, param2);
+
+// Use class
+const instance = new ClassA();
+instance.method();
+```
+
+[More examples →](examples.md)
+
+## Documentation
+
+- **[Functions Reference](functions.md)** - Detailed function documentation
+- **[Classes Reference](classes.md)** - Detailed class documentation
+- **[Usage Examples](examples.md)** - Real-world usage examples
+
+---
+
+*[Back to API Index](../index.md) | [Main Index](../../index.md)*
+```
+
+---
+
+#### Template 4: Module Functions (`api-reference/module-a/functions.md`)
+
+```markdown
+# Module A - Functions
+
+Public functions exported by Module A.
+
+## Function List
+
+- [`functionA()`](#functiona) - Brief description
+- [`functionB()`](#functionb) - Brief description
+- [`functionC()`](#functionc) - Brief description
+
+---
+
+## Function Details
+
+### `functionA()`
+
+**Signature**:
+```[language]
+ReturnType functionA(ParamType1 param1, ParamType2 param2)
+```
+
+**Location**: `src/module-a/file.ext:line`
+
+**Purpose**: 
+[Detailed description of what this function does, when to use it, and what problem it solves]
 
 **Parameters**:
-- `param1` ([type]): [Description]
-- `param2` ([type]): [Description]
+- `param1` (`ParamType1`): [Description of parameter]
+  - **Required**: Yes/No
+  - **Valid values**: [Constraints or valid range]
+  - **Default**: [Default value if applicable]
+- `param2` (`ParamType2`): [Description]
+  - **Required**: Yes/No
+  - **Valid values**: [Constraints]
 
-**Returns**: [type] - [Description]
+**Returns**: 
+- `ReturnType`: [Description of return value]
+  - **Success**: [What indicates successful execution]
+  - **Failure**: [What indicates failure - null, error code, etc]
+
+**Throws/Errors**:
+- `ErrorType1`: Thrown when [condition] - [how to handle]
+- `ErrorType2`: Thrown when [condition] - [how to handle]
+
+**Complexity**: 
+- **Time**: O([complexity]) - [Brief explanation]
+- **Space**: O([complexity]) - [Brief explanation]
+
+**Thread Safety**: ✅ Thread-safe / ❌ Not thread-safe / ⚠️ Conditionally safe
+[If not thread-safe or conditionally safe, explain why and precautions]
 
 **Example**:
 ```[language]
-// Example usage
-result = functionName(value1, value2);
+// Basic usage
+auto result = functionA(value1, value2);
+if (result) {
+    // Use result
+    processResult(result);
+}
+
+// With error handling
+try {
+    auto result = functionA(value1, value2);
+    // Use result
+} catch (const ErrorType1& e) {
+    // Handle specific error
+    log_error(e.what());
+}
 ```
 
-[Repeat for major public functions]
+**Common Use Cases**:
+1. **Use Case 1**: [Description and example]
+2. **Use Case 2**: [Description and example]
 
-## Implementation Details
+**Related Functions**:
+- [`functionB()`](#functionb) - Related operation
+- [`helperFunction()`](#helperfunction) - Often used together
 
-### Feature: [Feature Name]
+**See Also**:
+- [`ClassX`](classes.md#classx) - Used with this class
+- [External Documentation](https://example.com/docs) - Additional info
 
-**Implementation approach**: [High-level description]
+**Notes**:
+- ⚠️ [Important warnings or gotchas]
+- 💡 [Performance tips or best practices]
 
-**Key algorithms**: [If applicable]
+**Since**: Version [X.Y.Z]
 
-**Data structures used**: [If applicable]
-
-### Language-Specific Patterns
-
-[Document language-specific patterns used]
-
-**C/C++**:
-- Memory management: [RAII / Manual / Smart pointers]
-- Thread safety: [Approach]
-
-**Rust**:
-- Ownership pattern: [Description]
-- Error handling: [Result/Option usage]
-
-**Others**: [Relevant patterns]
-
-## Dependencies
-
-### Internal Dependencies
-
-- **[Module A]**: [Why and how it's used]
-- **[Module B]**: [Why and how it's used]
-
-### External Dependencies
-
-- **[Library 1]** (version): [Purpose and usage]
-- **[Library 2]** (version): [Purpose and usage]
-
-## Configuration
-
-[If applicable - configuration options]
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| [option1] | [type] | [value] | [Description] |
-
-## Testing
-
-**Test Coverage**: [X]% (if available)
-
-**Test Strategy**: [Unit / Integration / E2E]
-
-**Key Test Cases**:
-1. [Test case 1]
-2. [Test case 2]
-
-**Test Location**: `[path/to/tests]`
-
-## Error Handling
-
-[How this module handles errors]
-
-**Error Types**:
-- **[Error Type 1]**: [When it occurs]
-- **[Error Type 2]**: [When it occurs]
-
-## Performance Characteristics
-
-- **Time Complexity**: [Big-O notation if applicable]
-- **Space Complexity**: [Memory usage]
-- **Bottlenecks**: [Known performance issues]
-
-## Future Improvements
-
-### Potential Enhancements
-
-1. **[Enhancement 1]**: [Description and benefit]
-2. **[Enhancement 2]**: [Description and benefit]
-
-### Known Issues
-
-- **[Issue 1]**: [Description]
-- **[Issue 2]**: [Description]
-
-### Refactoring Opportunities
-
-- [Opportunity 1]
-- [Opportunity 2]
+**Deprecated**: [If deprecated, explain why and what to use instead]
 
 ---
 
-*Generated by smart-docs | Last updated: [Date]*
+### `functionB()`
+
+**Signature**:
+```[language]
+void functionB(ParamType param)
+```
+
+**Location**: `src/module-a/file.ext:line`
+
+[Follow same detailed structure as functionA...]
+
+---
+
+### `functionC()`
+
+[Similar structure...]
+
+---
+
+## Function Call Graph
+
+```mermaid
+graph LR
+    functionA --> helperFunc
+    functionA --> validate
+    functionB --> functionA
+    functionC --> functionB
 ```
 
 ---
 
-### Phase 4: Diagram Generation (10-15 minutes)
-
-**Objective**: Create clear, accurate Mermaid diagrams.
-
-#### Diagram Type Selection Guide
-
-| Purpose | Mermaid Type | Use Case |
-|---------|-------------|----------|
-| System boundaries | C4Context | Overall system and external systems |
-| Deployment units | C4Container | Executables, services, databases |
-| Module relationships | graph TB/LR | Component dependencies |
-| Process flows | sequenceDiagram | Workflow steps |
-| Class structure | classDiagram | OOP design |
-| State machines | stateDiagram-v2 | State transitions |
-| Data models | erDiagram | Database schema |
-| Process logic | flowchart | Algorithms, business logic |
-
-#### Mermaid Best Practices
-
-1. **Keep Simple**: Max 10-12 nodes per diagram
-2. **Clear Labels**: Use descriptive, concise text
-3. **Consistent Styling**: Use same naming conventions
-4. **Add Context**: Provide explanation before diagram
-5. **Validate Syntax**: Test before including
-6. **Use Subgraphs**: Group related components
-7. **Direction**: Choose TB (top-bottom) or LR (left-right) for clarity
-
-#### Language-Specific Diagram Focus
-
-**C/C++**:
-- Header/source file relationships
-- Library dependencies
-- Compilation unit structure
-- Memory layout (for low-level systems)
-
-**Rust**:
-- Module tree
-- Trait relationships
-- Ownership flow (where relevant)
-
-**OOP Languages** (Java, C++, Python):
-- Class hierarchies
-- Interface implementations
-- Design patterns
-
-**Functional Languages**:
-- Data transformation pipelines
-- Function composition
+*[Back to Module Index](index.md) | [API Index](../index.md) | [Main Index](../../index.md)*
+```
 
 ---
 
-### Phase 5: Quality Assurance (5-10 minutes)
-
-**Objective**: Verify documentation quality and completeness.
-
-#### Quality Checklist
-
-- [ ] **Structure**: All required documents created
-- [ ] **Diagrams**: All Mermaid syntax valid and meaningful
-- [ ] **Content**: No placeholder text (Lorem ipsum, TODO, TBD)
-- [ ] **Accuracy**: Technical details verified against code
-- [ ] **Completeness**: All major components documented
-- [ ] **Consistency**: Naming and formatting consistent
-- [ ] **Links**: Cross-references between documents work
-- [ ] **Language**: Grammar and technical writing quality
-- [ ] **Code Examples**: Syntax correct and relevant
-- [ ] **Metrics**: LOC counts and statistics accurate
-
-#### Validation Steps
-
-1. **Test Mermaid**: Verify each diagram renders
-2. **Check Cross-References**: All internal links work
-3. **Review Coverage**: Major components documented
-4. **Verify Accuracy**: Technical details match code
-5. **Read Flow**: Documentation flows logically
-
-#### Generation Summary Template
+#### Template 5: Module Classes (`api-reference/module-a/classes.md`)
 
 ```markdown
-## 📚 Documentation Generated Successfully
+# Module A - Classes
 
-### Documents Created
+Public classes and types exported by Module A.
 
-✅ **1-project-overview.md** ([X] lines)
-   - Technology stack identified: [Languages]
-   - [N] key features documented
-   - Project metrics calculated
+## Class List
 
-✅ **2-architecture-overview.md** ([X] lines)
-   - System context diagram (C4 Level 1)
-   - Container architecture (C4 Level 2)
-   - [N] component diagrams
-   - [N] modules documented
+- [`ClassA`](#classa) - Brief description
+- [`ClassB`](#classb) - Brief description
 
-✅ **3-workflow-overview.md** ([X] lines)
-   - [N] core workflows documented
-   - [N] sequence diagrams
-   - State management documented
+---
 
-✅ **4-deep-dive/** ([N] component documents)
-   - [Component 1] documented
-   - [Component 2] documented
-   - [Additional] components covered
+## Class Details
 
-### Documentation Statistics
+### `ClassA`
 
-- **Total Documentation**: ~[X] lines
-- **Mermaid Diagrams**: [N] diagrams
-- **Components Documented**: [N]/[Total]
-- **Coverage**: ~[X]% of codebase analyzed
-- **Languages Detected**: [List]
+**Location**: `src/module-a/class-a.ext:line`
 
-### Next Steps
+**Description**: 
+[Detailed description of what this class represents, its purpose, and when to use it]
 
-1. **Review**: Check generated docs for accuracy
-2. **Customize**: Add project-specific details
-3. **Integrate**: Link from main README.md
-4. **Maintain**: Update when architecture changes
+**Inheritance Hierarchy**:
+```mermaid
+classDiagram
+    BaseClass <|-- ClassA
+    ClassA <|-- DerivedClass
+    ClassA ..|> Interface1
+    ClassA --> HelperClass : uses
+    
+    class BaseClass {
+        <<abstract>>
+        +baseMethod()
+    }
+    
+    class ClassA {
+        -privateField: Type
+        #protectedField: Type
+        +publicField: Type
+        +ClassA(params)
+        +method1()
+        +method2()
+        -privateMethod()
+    }
+    
+    class Interface1 {
+        <<interface>>
+        +interfaceMethod()*
+    }
+```
 
-### Access Documentation
+**Implements**: `Interface1`, `Interface2`  
+**Inherits From**: `BaseClass`  
+**Known Subclasses**: `DerivedClass`, `SpecializedClass`
 
-All documentation is in: `./docs/`
+---
 
-Start with: [`./docs/1-project-overview.md`](./docs/1-project-overview.md)
+#### Constructor
+
+##### `ClassA(param1, param2)`
+
+**Signature**:
+```[language]
+ClassA(ParamType1 param1, ParamType2 param2)
+```
+
+**Purpose**: [What the constructor initializes and sets up]
+
+**Parameters**:
+- `param1` (`ParamType1`): [Description]
+  - **Required**: Yes/No
+  - **Constraints**: [Any constraints]
+- `param2` (`ParamType2`): [Description]
+
+**Throws**: 
+- `ExceptionType`: When [condition]
+
+**Example**:
+```[language]
+// Default construction
+ClassA obj1(value1, value2);
+
+// With optional parameters
+ClassA obj2(value1, value2, optionalValue);
+
+// Error handling
+try {
+    ClassA obj(invalidValue, value2);
+} catch (const ExceptionType& e) {
+    // Handle error
+}
+```
+
+**Notes**:
+- ⚠️ [Important notes about resource management, thread safety, etc]
+
+---
+
+#### Public Methods
+
+##### `method1()`
+
+**Signature**:
+```[language]
+ReturnType method1(ParamType param)
+```
+
+**Purpose**: [What this method does]
+
+**Parameters**:
+- `param` (`ParamType`): [Description]
+
+**Returns**: `ReturnType` - [Description]
+
+**Throws**: [List exceptions]
+
+**Complexity**: Time O([x]), Space O([y])
+
+**Thread Safety**: ✅/❌/⚠️
+
+**Example**:
+```[language]
+ClassA obj(param1, param2);
+auto result = obj.method1(value);
+// Use result
+```
+
+**Notes**:
+- [Any special considerations]
+
+---
+
+##### `method2()`
+
+[Similar structure...]
+
+---
+
+#### Public Properties/Fields
+
+##### `publicField`
+
+**Type**: `FieldType`  
+**Access**: Read-write / Read-only  
+**Description**: [What this field represents]
+
+**Example**:
+```[language]
+obj.publicField = value;  // Set
+auto value = obj.publicField;  // Get
+```
+
+---
+
+#### Static Members
+
+##### `StaticMethod()`
+
+**Signature**:
+```[language]
+static ReturnType StaticMethod(Params)
+```
+
+**Purpose**: [What this static method does]
+
+**Example**:
+```[language]
+auto result = ClassA::StaticMethod(params);
+```
+
+---
+
+#### Usage Example
+
+**Complete Usage Example**:
+```[language]
+// 1. Create instance
+ClassA processor(config, options);
+
+// 2. Configure
+processor.setOption("key", "value");
+
+// 3. Use methods
+auto result = processor.method1(data);
+processor.method2(result);
+
+// 4. Get results
+auto output = processor.getOutput();
+
+// 5. Cleanup (if needed)
+processor.cleanup();
+```
+
+**Advanced Usage**:
+```[language]
+// Inheritance example
+class MyClass : public ClassA {
+public:
+    MyClass() : ClassA(default1, default2) {}
+    
+    void customMethod() override {
+        // Custom implementation
+        ClassA::customMethod();  // Call base
+    }
+};
+```
+
+---
+
+#### Thread Safety
+
+**Thread Safety**: ✅ Thread-safe / ❌ Not thread-safe / ⚠️ Conditionally safe
+
+[Detailed explanation of thread safety guarantees, what operations are safe, what requires synchronization, etc]
+
+**Safe Operations**:
+- Reading properties after construction
+- Calling const methods
+
+**Unsafe Operations**:
+- Concurrent method1() calls
+- Simultaneous read/write to publicField
+
+**Recommendations**:
+```[language]
+// Use mutex for thread safety
+std::mutex mtx;
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    obj.method1(data);
+}
+```
+
+---
+
+#### Performance Notes
+
+- **Memory Usage**: [Approximate memory footprint]
+- **Performance**: [Performance characteristics]
+- **Optimization Tips**: [How to use efficiently]
+
+---
+
+#### Related
+
+**Related Classes**:
+- [`ClassB`](#classb) - Often used together
+- [`HelperClass`](../module-b/classes.md#helperclass) - Utility class
+
+**See Also**:
+- [Usage Examples](examples.md#classa-examples)
+- [Deep Dive](../../deep-dive/module-a.md#classa)
+
+---
+
+**Since**: Version [X.Y.Z]  
+**Deprecated**: [If deprecated, migration guide]
+
+---
+
+### `ClassB`
+
+[Similar detailed structure...]
+
+---
+
+*[Back to Module Index](index.md) | [API Index](../index.md) | [Main Index](../../index.md)*
+```
+
+---
+
+#### Template 6: Module Examples (`api-reference/module-a/examples.md`)
+
+```markdown
+# Module A - Usage Examples
+
+Real-world usage examples for Module A APIs.
+
+## Basic Usage
+
+### Example 1: Getting Started
+
+**Scenario**: [Description of what this example demonstrates]
+
+```[language]
+// Step 1: Import necessary components
+import { functionA, ClassA } from 'module-a';
+
+// Step 2: Initialize
+const config = {
+    option1: value1,
+    option2: value2
+};
+
+// Step 3: Use the API
+const result = functionA(config);
+
+// Step 4: Process results
+if (result.success) {
+    console.log('Success:', result.data);
+} else {
+    console.error('Error:', result.error);
+}
+```
+
+**Expected Output**:
+```
+Success: { data: [...] }
+```
+
+---
+
+### Example 2: Using ClassA
+
+**Scenario**: [What this demonstrates]
+
+```[language]
+// Create instance
+const processor = new ClassA(param1, param2);
+
+// Configure
+processor.setOption('key', 'value');
+
+// Process data
+const input = prepareInput();
+const output = processor.process(input);
+
+// Handle results
+output.forEach(item => {
+    console.log(item);
+});
+```
+
+---
+
+## Advanced Usage
+
+### Example 3: Error Handling
+
+**Scenario**: Handling errors gracefully
+
+```[language]
+try {
+    const result = functionA(userInput);
+    
+    if (result.hasWarnings()) {
+        result.warnings.forEach(warn => {
+            console.warn('Warning:', warn);
+        });
+    }
+    
+    processResult(result);
+    
+} catch (ValidationError as e) {
+    console.error('Invalid input:', e.message);
+    showUserError(e.message);
+    
+} catch (ProcessingError as e) {
+    console.error('Processing failed:', e.message);
+    logError(e);
+    retry();
+}
+```
+
+---
+
+### Example 4: Performance Optimization
+
+**Scenario**: Optimizing for large datasets
+
+```[language]
+// Use streaming for large data
+const processor = new ClassA({
+    mode: 'streaming',
+    chunkSize: 1000
+});
+
+// Process in batches
+for await (const chunk of dataStream) {
+    const results = processor.processBatch(chunk);
+    await saveResults(results);
+}
+
+// Cleanup
+processor.finalize();
+```
+
+**Performance**: Processes 1M records in ~2 seconds
+
+---
+
+### Example 5: Integration with Module B
+
+**Scenario**: Using Module A with Module B
+
+```[language]
+import { ClassA } from 'module-a';
+import { ClassB } from 'module-b';
+
+// Module A processes, Module B stores
+const processorA = new ClassA(config);
+const storageB = new ClassB(dbConfig);
+
+// Pipeline
+const data = loadData();
+const processed = processorA.process(data);
+const stored = await storageB.save(processed);
+
+console.log(`Stored ${stored.count} items`);
+```
+
+---
+
+## Common Patterns
+
+### Pattern 1: Builder Pattern
+
+```[language]
+const result = new ClassA()
+    .setOption1(value1)
+    .setOption2(value2)
+    .setOption3(value3)
+    .build();
+```
+
+### Pattern 2: Factory Pattern
+
+```[language]
+// Use factory for different configurations
+const processor = ClassA.createProcessor('type-a', config);
+// vs
+const processor = ClassA.createProcessor('type-b', config);
+```
+
+---
+
+## Testing Examples
+
+### Unit Test Example
+
+```[language]
+describe('functionA', () => {
+    test('processes valid input correctly', () => {
+        const input = { data: [1, 2, 3] };
+        const result = functionA(input);
+        
+        expect(result.success).toBe(true);
+        expect(result.data).toHaveLength(3);
+    });
+    
+    test('handles invalid input', () => {
+        const invalid = { data: null };
+        
+        expect(() => {
+            functionA(invalid);
+        }).toThrow(ValidationError);
+    });
+});
+```
+
+---
+
+## Troubleshooting
+
+### Common Issue 1: [Issue Description]
+
+**Problem**: [What goes wrong]
+
+**Solution**:
+```[language]
+// Wrong way
+const result = functionA(data);  // Fails
+
+// Correct way
+const validated = validateData(data);
+const result = functionA(validated);  // Works
+```
+
+### Common Issue 2: [Issue Description]
+
+[Similar structure...]
+
+---
+
+*[Back to Module Index](index.md) | [API Index](../index.md) | [Main Index](../../index.md)*
+```
+
+---
+
+#### Template 7: Code Structure - C4 Level 4 (`architecture/5-code-structure.md`)
+
+```markdown
+# Code Structure (C4 Level 4)
+
+Detailed code-level architecture and organization.
+
+## Overview
+
+This document describes the code-level structure, including key functions, classes, and their relationships. This is the deepest level of the C4 model, showing implementation details.
+
+---
+
+## Module A - Code Structure
+
+### Public API Surface
+
+**Functions** ([N] total):
+- `initialize()` - System initialization ([X] LOC, Complexity: Low)
+- `processData()` - Main processing ([Y] LOC, Complexity: Medium)
+- `cleanup()` - Resource cleanup ([Z] LOC, Complexity: Low)
+- `getVersion()` - Version information (simple getter)
+- `configure()` - Configuration ([A] LOC, Complexity: Medium)
+
+**Classes** ([N] total):
+- `DataProcessor` - Main processor class ([B] LOC, Complexity: High)
+- `Configuration` - Configuration container ([C] LOC, Complexity: Low)
+- `Result` - Result wrapper ([D] LOC, Complexity: Low)
+
+[View detailed API documentation →](../api-reference/module-a/index.md)
+
+### Internal Structure
+
+**Private Functions** ([N] total):
+- Implementation details not exposed in public API
+- Helper functions for internal processing
+
+**Helper Functions** ([N] total):
+- `validateInput()` - Input validation
+- `transformData()` - Data transformation
+- `logOperation()` - Logging utility
+- [More...]
+
+### Function Call Graph
+
+```mermaid
+graph TB
+    subgraph "Entry Points"
+        main[main]
+        api[API Handler]
+    end
+    
+    subgraph "Public API - Module A"
+        init[initialize]
+        process[processData]
+        cleanup[cleanup]
+    end
+    
+    subgraph "Internal - Module A"
+        validate[validateInput]
+        transform[transformData]
+        persist[persistData]
+        log[logOperation]
+    end
+    
+    subgraph "Utilities"
+        helper1[helperFunc1]
+        helper2[helperFunc2]
+    end
+    
+    main --> init
+    main --> process
+    api --> process
+    
+    init --> validate
+    init --> log
+    
+    process --> validate
+    process --> transform
+    process --> persist
+    process --> log
+    
+    validate --> helper1
+    transform --> helper2
+    persist --> log
+    
+    style init fill:#90EE90
+    style process fill:#90EE90
+    style cleanup fill:#90EE90
+```
+
+**Call Statistics**:
+- `logOperation()` - Called by 15 functions (most used)
+- `validateInput()` - Called by 8 functions
+- `transformData()` - Called by 6 functions
+- `helperFunc1()` - Called by 5 functions
+
+### Class Hierarchy
+
+```mermaid
+classDiagram
+    class IProcessor {
+        <<interface>>
+        +process()*
+        +validate()*
+    }
+    
+    class BaseProcessor {
+        <<abstract>>
+        #config: Configuration
+        #logger: Logger
+        +BaseProcessor(config)
+        +process()
+        #validate()*
+        #log(message)
+    }
+    
+    class DataProcessor {
+        -data: DataStore
+        -state: ProcessorState
+        +DataProcessor(config)
+        +process(input)
+        +transform(data)
+        +getResults()
+        -internalProcess()
+        -updateState()
+    }
+    
+    class StreamProcessor {
+        -stream: DataStream
+        -buffer: Buffer
+        +StreamProcessor(config)
+        +process(input)
+        +streamData()
+        -fillBuffer()
+    }
+    
+    class AsyncProcessor {
+        -queue: TaskQueue
+        -threadPool: ThreadPool
+        +AsyncProcessor(config)
+        +process(input)
+        +async processAsync()
+        -enqueueTask()
+    }
+    
+    class Configuration {
+        +option1: Type
+        +option2: Type
+        +validate()
+        +toJSON()
+    }
+    
+    class Helper {
+        +static utilityMethod()
+        +static transform()
+    }
+    
+    IProcessor <|.. BaseProcessor : implements
+    BaseProcessor <|-- DataProcessor : extends
+    BaseProcessor <|-- StreamProcessor : extends
+    BaseProcessor <|-- AsyncProcessor : extends
+    
+    DataProcessor --> Configuration : uses
+    DataProcessor --> Helper : uses
+    StreamProcessor --> Helper : uses
+    AsyncProcessor --> Helper : uses
+```
+
+**Inheritance Relationships**:
+- `IProcessor` ← `BaseProcessor` ← `DataProcessor`
+- `IProcessor` ← `BaseProcessor` ← `StreamProcessor`
+- `IProcessor` ← `BaseProcessor` ← `AsyncProcessor`
+
+### Complexity Metrics
+
+#### Function Complexity
+
+| Function | LOC | Complexity | Parameters | Nesting | Classification |
+|----------|-----|------------|------------|---------|----------------|
+| `initialize()` | 45 | 3 | 2 | 2 | ✅ Low |
+| `processData()` | 120 | 8 | 4 | 3 | ⚠️ Medium |
+| `transformData()` | 85 | 6 | 3 | 3 | ⚠️ Medium |
+| `validateInput()` | 95 | 10 | 2 | 4 | ⚠️ Medium |
+| `internalProcess()` | 180 | 15 | 5 | 5 | ❌ High |
+
+**Legend**:
+- **Complexity**: Cyclomatic complexity (branches + 1)
+  - Low: 1-5 (simple, straightforward)
+  - Medium: 6-10 (moderate complexity)
+  - High: 11+ (consider refactoring)
+- **Parameters**: Number of function parameters
+  - Good: ≤3
+  - Warning: 4-5
+  - Poor: >5 (consider parameter object)
+- **Nesting**: Maximum indentation depth
+  - Good: ≤3
+  - Warning: 4
+  - Poor: ≥5
+
+#### Class Complexity
+
+| Class | LOC | Methods | Complexity | Dependencies |
+|-------|-----|---------|------------|--------------|
+| `DataProcessor` | 250 | 12 | 12 | 5 |
+| `Configuration` | 80 | 6 | 3 | 1 |
+| `Result` | 50 | 4 | 2 | 0 |
+
+### Detailed Function Analysis
+
+#### High Complexity Functions (Need Review)
+
+##### `internalProcess()` - Complexity: 15
+
+**Location**: `src/module-a/processor.cpp:245`
+
+**Issues**:
+- ❌ Too long (180 lines)
+- ❌ Multiple nested loops (3 levels)
+- ❌ Many conditional branches (12)
+- ❌ High parameter count (5)
+
+**Current Structure**:
+```
+internalProcess()
+├─ validate inputs (3 conditions)
+├─ loop: process each item
+│  ├─ nested loop: process sub-items
+│  │  └─ nested loop: process details
+│  │     ├─ if: condition 1
+│  │     ├─ if: condition 2
+│  │     └─ if: condition 3
+│  └─ if: special case handling
+├─ if: error occurred
+└─ finalize results
+```
+
+**Recommendations**:
+1. **Extract methods**: Create separate functions for nested loops
+   - `processItem(item)` - Extract outer loop body
+   - `processSubItems(subItems)` - Extract first nested loop
+   - `processDetails(details)` - Extract innermost loop
+
+2. **Reduce parameters**: Use parameter object or builder pattern
+   ```[language]
+   // Instead of:
+   internalProcess(param1, param2, param3, param4, param5)
+   
+   // Use:
+   struct ProcessParams {
+       Type1 param1;
+       Type2 param2;
+       // ...
+   };
+   internalProcess(const ProcessParams& params)
+   ```
+
+3. **Simplify conditionals**: Consider strategy or state pattern
+   ```[language]
+   // Instead of: if/else chains
+   // Use: strategy pattern with lookup table
+   ```
+
+**Refactoring Priority**: 🔴 High (Critical)
+
+---
+
+### Dependencies
+
+#### Internal Dependencies
+
+**Module A depends on**:
+- `module-utils` - Utility functions
+- `module-config` - Configuration management
+
+**Used by**:
+- `module-b` - Calls `processData()`
+- `module-c` - Uses `DataProcessor` class
+
+```mermaid
+graph LR
+    ModuleA[Module A]
+    ModuleB[Module B]
+    ModuleC[Module C]
+    Utils[module-utils]
+    Config[module-config]
+    
+    ModuleA --> Utils
+    ModuleA --> Config
+    ModuleB --> ModuleA
+    ModuleC --> ModuleA
+    
+    style ModuleA fill:#FFE4B5
+```
+
+#### External Dependencies
+
+**Third-party libraries used**:
+- `boost::asio` - Asynchronous I/O
+- `spdlog` - Logging
+- `nlohmann::json` - JSON parsing
+
+---
+
+## Module B - Code Structure
+
+[Similar detailed structure for Module B...]
+
+---
+
+## Cross-Module Interactions
+
+### Sequence: Data Processing Flow
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant ModuleA
+    participant ModuleB
+    participant ModuleC
+    participant Database
+    
+    Main->>ModuleA: initialize()
+    activate ModuleA
+    ModuleA->>ModuleA: validateConfig()
+    ModuleA->>Database: connect()
+    ModuleA-->>Main: ready
+    deactivate ModuleA
+    
+    Main->>ModuleA: processData(input)
+    activate ModuleA
+    ModuleA->>ModuleA: validateInput()
+    
+    ModuleA->>ModuleB: transform(data)
+    activate ModuleB
+    ModuleB->>ModuleC: enhance(data)
+    activate ModuleC
+    ModuleC-->>ModuleB: enhanced
+    deactivate ModuleC
+    ModuleB-->>ModuleA: transformed
+    deactivate ModuleB
+    
+    ModuleA->>Database: save(result)
+    Database-->>ModuleA: saved
+    
+    ModuleA-->>Main: success
+    deactivate ModuleA
+```
+
+### Call Flow: Request Processing
+
+```mermaid
+flowchart TD
+    Start([Request Received]) --> Validate{Validate Input}
+    
+    Validate -->|Invalid| Error1[Return Error]
+    Validate -->|Valid| Process[processData]
+    
+    Process --> Transform[transformData]
+    Transform --> Check{Check Result}
+    
+    Check -->|Error| Error2[Handle Error]
+    Check -->|Success| Save[persistData]
+    
+    Save --> Cache{Update Cache?}
+    Cache -->|Yes| UpdateCache[updateCache]
+    Cache -->|No| Response
+    
+    UpdateCache --> Response[Return Response]
+    Error1 --> End([End])
+    Error2 --> End
+    Response --> End
+    
+    style Start fill:#90EE90
+    style End fill:#FFB6C1
+    style Error1 fill:#FF6B6B
+    style Error2 fill:#FF6B6B
+```
+
+---
+
+## Performance Hotspots
+
+### Profiling Results
+
+Functions that consume most CPU time (if profiling data available):
+
+1. `internalProcess()` - 35% of total time
+2. `transformData()` - 25% of total time
+3. `validateInput()` - 15% of total time
+4. `persistData()` - 10% of total time
+5. Others - 15% of total time
+
+### Optimization Opportunities
+
+1. **`internalProcess()`**:
+   - Consider parallelization of loop processing
+   - Cache repeated calculations
+   - Use more efficient data structures
+
+2. **`transformData()`**:
+   - Implement batch processing
+   - Reduce memory allocations
+
+3. **`validateInput()`**:
+   - Early return on first validation failure
+   - Cache validation results
+
+---
+
+## Testing Coverage
+
+### Module A Testing
+
+**Test Files**:
+- `test/module-a/core_test.ext` - Core functionality
+- `test/module-a/processor_test.ext` - Processor tests
+- `test/module-a/integration_test.ext` - Integration tests
+
+**Coverage**:
+- ✅ `initialize()` - 15 test cases
+- ✅ `processData()` - 25 test cases
+- ✅ `cleanup()` - 8 test cases
+- ⚠️ `internalProcess()` - 5 test cases (needs more edge cases)
+- ❌ `helperFunc2()` - Not tested
+
+**Coverage Estimate**: ~85%
+
+[Detailed test coverage →](../reference/test-coverage.md)
+
+---
+
+## Code Quality Metrics
+
+### Summary
+
+- **Total Functions**: 45
+- **Average Complexity**: 6.2
+- **High Complexity (>10)**: 3 functions
+- **Large Functions (>100 LOC)**: 4 functions
+- **Functions with >5 params**: 2 functions
+
+### Quality Score: B+ (85/100)
+
+**Strengths**:
+- ✅ Most functions have low complexity
+- ✅ Good test coverage (85%)
+- ✅ Clear naming conventions
+
+**Areas for Improvement**:
+- ⚠️ Refactor 3 high-complexity functions
+- ⚠️ Add tests for helper functions
+- ⚠️ Split 4 large functions
+
+---
+
+*[Back to Architecture Index](1-project-overview.md) | [Main Index](../index.md)*
+```
+
+---
+
+#### Template 8: Complexity Analysis (`reference/complexity-analysis.md`)
+
+```markdown
+# Complexity Analysis
+
+Comprehensive code complexity metrics and recommendations.
+
+## Executive Summary
+
+- **Total Functions Analyzed**: [N]
+- **Average Complexity**: [X.X]
+- **High Complexity Functions**: [N] (>10)
+- **Very High Complexity**: [N] (>15)
+- **Largest Functions**: [N] (>100 LOC)
+- **Overall Code Health**: [Grade A-F]
+
+## Complexity Distribution
+
+### By Complexity Score
+
+```
+Complexity Range | Count | Percentage | Status
+-----------------|-------|------------|--------
+1-5 (Low)        | 45    | 60%        | ✅ Good
+6-10 (Medium)    | 20    | 27%        | ⚠️ Acceptable
+11-15 (High)     | 7     | 9%         | ❌ Review
+16+ (Very High)  | 3     | 4%         | 🔴 Refactor
+```
+
+### By Function Size
+
+```
+LOC Range        | Count | Percentage | Status
+-----------------|-------|------------|--------
+0-20 lines       | 45    | 60%        | ✅ Good
+21-50 lines      | 20    | 27%        | ✅ Acceptable
+51-100 lines     | 7     | 9%         | ⚠️ Large
+101-200 lines    | 2     | 3%         | ❌ Too Large
+200+ lines       | 1     | 1%         | 🔴 Refactor
+```
+
+### Visual Distribution
+
+```
+Complexity:
+Low      ████████████████████████████████████░░░░░░ 60%
+Medium   ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░ 27%
+High     █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 9%
+VeryHigh ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 4%
+```
+
+---
+
+## High Priority: Functions Needing Refactoring
+
+### 1. `processComplexData()` - Module A
+
+**Complexity**: 🔴 15 | **LOC**: 180 | **Priority**: Critical
+
+**Location**: `src/module-a/processor.cpp:245`
+
+**Issues**:
+- ❌ Cyclomatic complexity too high (15)
+- ❌ Function too long (180 lines)
+- ❌ Multiple nested loops (3 levels deep)
+- ❌ Many conditional branches (12)
+- ❌ Too many parameters (5)
+- ❌ Maximum nesting depth: 5 levels
+
+**Complexity Breakdown**:
+- Base complexity: 1
+- If statements: 8 (+8)
+- Loop statements: 4 (+4)
+- Switch cases: 2 (+2)
+- **Total**: 15
+
+**Code Structure**:
+```
+processComplexData(p1, p2, p3, p4, p5)
+├─ if (condition1)              [+1]
+│  ├─ for (item in list)        [+1]
+│  │  ├─ if (condition2)        [+1]
+│  │  │  ├─ for (sub in item)   [+1]
+│  │  │  │  ├─ if (condition3)  [+1]
+│  │  │  │  │  └─ for (detail)  [+1]
+│  │  │  │  │     └─ if (cond4) [+1]
+│  │  │  │  └─ else             [+1]
+│  │  │  └─ if (condition5)     [+1]
+│  │  └─ switch (type)
+│  │     ├─ case A:             [+1]
+│  │     └─ case B:             [+1]
+│  └─ if (condition6)            [+1]
+└─ else                          [+1]
+   └─ if (condition7)            [+1]
+```
+
+**Refactoring Recommendations**:
+
+1. **Extract Nested Loops** → 3 new functions
+   ```[language]
+   // Extract to:
+   processComplexData(params) {
+       validateParams(params);
+       processItems(params.items);
+       finalizeResults();
+   }
+   
+   processItems(items) {
+       for item in items:
+           processSubItems(item);
+   }
+   
+   processSubItems(item) {
+       for sub in item.subs:
+           processDetails(sub);
+   }
+   
+   processDetails(details) {
+       // Innermost loop logic
+   }
+   ```
+
+2. **Use Parameter Object**
+   ```[language]
+   // Instead of 5 parameters:
+   processComplexData(p1, p2, p3, p4, p5)
+   
+   // Use:
+   struct ProcessParams {
+       Type1 p1;
+       Type2 p2;
+       Type3 p3;
+       Type4 p4;
+       Type5 p5;
+   };
+   processComplexData(const ProcessParams& params)
+   ```
+
+3. **Replace Conditionals with Strategy Pattern**
+   ```[language]
+   // Instead of: multiple if/else or switch
+   if (type == A) { /* ... */ }
+   else if (type == B) { /* ... */ }
+   else if (type == C) { /* ... */ }
+   
+   // Use: strategy pattern
+   auto strategy = strategyFactory.create(type);
+   strategy->execute();
+   ```
+
+**Expected Improvements**:
+- Complexity: 15 → 5-7 (across multiple functions)
+- LOC per function: 180 → 30-50 each
+- Nesting depth: 5 → 2-3
+- Maintainability: Low → High
+
+**Estimated Effort**: 4-6 hours
+
+---
+
+### 2. `handleMultipleCases()` - Module C
+
+**Complexity**: 🔴 12 | **LOC**: 145 | **Priority**: High
+
+**Location**: `src/module-c/handler.cpp:112`
+
+**Issues**:
+- ❌ Long switch statement with complex cases
+- ❌ Duplicate logic across cases
+- ❌ Function too long
+
+**Refactoring Recommendations**:
+1. **Extract case handlers** into separate functions
+2. **Use lookup table** or strategy pattern
+3. **Remove duplicate logic** into shared helpers
+
+**Expected Improvements**:
+- Complexity: 12 → 4-6
+- LOC: 145 → 40-60
+
+**Estimated Effort**: 3-4 hours
+
+---
+
+### 3. `parseAndValidateInput()` - Module B
+
+**Complexity**: 🔴 11 | **LOC**: 125 | **Priority**: High
+
+**Location**: `src/module-b/parser.cpp:78`
+
+**Issues**:
+- ❌ Mixing parsing and validation logic
+- ❌ Deep nesting
+- ❌ Multiple responsibilities
+
+**Refactoring Recommendations**:
+1. **Separate parsing and validation** into two functions
+   - `parseInput()` - Parsing only
+   - `validateParsedData()` - Validation only
+2. **Use early returns** to reduce nesting
+3. **Extract validation rules** into separate validators
+
+**Expected Improvements**:
+- Complexity: 11 → 5-6 (each function)
+- LOC: 125 → 50-60 each
+- Single Responsibility Principle: Violated → Followed
+
+**Estimated Effort**: 3-4 hours
+
+---
+
+## Medium Priority: Review Recommended
+
+### Functions with Complexity 6-10
+
+| Function | Module | Complexity | LOC | Issues | Priority |
+|----------|--------|------------|-----|--------|----------|
+| `transformData()` | A | 8 | 85 | Multiple branches | Medium |
+| `initializeSystem()` | Core | 9 | 95 | Many parameters | Medium |
+| `processRequest()` | API | 7 | 70 | Nested conditions | Low |
+| `validateConfig()` | Config | 8 | 75 | Long validation | Low |
+
+**General Recommendations**:
+- Review for possible simplification
+- Consider extracting helper functions
+- Add comprehensive tests
+- Not critical but monitor
+
+---
+
+## Parameter Complexity
+
+### Functions with >5 Parameters
+
+Functions with too many parameters (>5) make code harder to use and test:
+
+1. **`configureSystem()`** - 8 parameters
+   ```[language]
+   // Current (BAD):
+   configureSystem(p1, p2, p3, p4, p5, p6, p7, p8)
+   
+   // Recommended (GOOD):
+   struct SystemConfig {
+       Type1 p1; Type2 p2; /* ... */ Type8 p8;
+   };
+   configureSystem(const SystemConfig& config)
+   ```
+   **Impact**: High | **Effort**: 2 hours
+
+2. **`initializeDatabase()`** - 7 parameters
+   ```[language]
+   // Use builder pattern:
+   DatabaseBuilder()
+       .withHost(host)
+       .withPort(port)
+       .withCredentials(user, pass)
+       .withOptions(options)
+       .build();
+   ```
+   **Impact**: Medium | **Effort**: 3 hours
+
+3. **`createConnection()`** - 6 parameters
+   **Impact**: Medium | **Effort**: 1-2 hours
+
+---
+
+## Function Size Analysis
+
+### Functions Over 100 Lines
+
+Large functions are harder to understand and maintain:
+
+1. **`processComplexData()`** - 180 lines (see above)
+2. **`handleMultipleCases()`** - 145 lines (see above)
+3. **`parseAndValidateInput()`** - 125 lines (see above)
+4. **`generateReport()`** - 115 lines
+   - **Recommendation**: Extract report sections into functions
+   - **Effort**: 2-3 hours
+
+---
+
+## Nesting Depth Analysis
+
+### Functions with Deep Nesting (>4 levels)
+
+Deep nesting makes code hard to read and understand:
+
+| Function | Module | Max Nesting | Recommendation |
+|----------|--------|-------------|----------------|
+| `processComplexData()` | A | 5 | Extract nested blocks |
+| `handleNestedStructure()` | B | 5 | Use early returns, flatten |
+| `traverseTree()` | Utils | 4 | Acceptable for recursive |
+
+**Best Practices**:
+- **Limit**: Keep nesting ≤3 levels
+- **Technique**: Use early returns/continues
+- **Pattern**: Extract nested blocks into functions
+
+---
+
+## Complexity by Module
+
+| Module | Functions | Avg Complexity | High Complexity Count | Grade |
+|--------|-----------|----------------|----------------------|-------|
+| Module A | 25 | 5.2 | 3 | B |
+| Module B | 18 | 4.8 | 1 | B+ |
+| Module C | 32 | 6.1 | 5 | B- |
+| Core | 15 | 4.2 | 0 | A |
+| Utils | 22 | 3.8 | 0 | A |
+
+---
+
+## Recommendations Summary
+
+### Immediate Actions (This Sprint)
+
+1. ⛔ **Refactor `processComplexData()`** (Critical)
+   - Complexity 15 → 5-7
+   - Split into 4 functions
+   - Effort: 4-6 hours
+
+2. ⛔ **Refactor `handleMultipleCases()`** (High)
+   - Use strategy pattern
+   - Effort: 3-4 hours
+
+3. ⛔ **Refactor `parseAndValidateInput()`** (High)
+   - Separate concerns
+   - Effort: 3-4 hours
+
+**Total Effort**: 10-14 hours (~2 days)
+
+### Short-term (Next Sprint)
+
+4. ⚠️ Reduce parameter counts (3 functions)
+   - Use parameter objects/builders
+   - Effort: 5-7 hours
+
+5. ⚠️ Review medium complexity functions (4 functions)
+   - Extract helpers where beneficial
+   - Effort: 3-4 hours
+
+### Long-term (Next Quarter)
+
+6. 📊 Implement complexity monitoring in CI/CD
+7. 📚 Add team guidelines for complexity limits
+8. 🔍 Regular code reviews focusing on complexity
+
+---
+
+## Code Quality Trends
+
+If historical data is available:
+
+```
+Complexity Over Time:
+6.5 |                    ●
+6.0 |                ●
+5.5 |            ●          ● (current)
+5.0 |        ●
+4.5 |    ●
+    |________________________________
+     Jan  Feb  Mar  Apr  May
+```
+
+**Trend**: ⬇️ Improving (complexity decreasing)
+
+---
+
+*[Back to Main Index](../index.md)*
+```
+
+---
+
+#### Template 9: Symbol Index (`reference/symbols-index.md`)
+
+```markdown
+# Symbol Index
+
+Complete alphabetical index of all public symbols (functions, classes, types).
+
+## Quick Search
+
+Use Ctrl+F or Cmd+F to search this page.
+
+**Statistics**:
+- Total Functions: [N]
+- Total Classes: [N]
+- Total Types: [N]
+- Total Symbols: [N]
+
+---
+
+## A
+
+### Functions
+
+#### `addClass(className: string)`
+- **Module**: UI Module
+- **Purpose**: Adds a CSS class to an element
+- **Location**: `src/ui/dom.ext:45`
+- **Documentation**: [View →](../api-reference/module-ui/functions.md#addclass)
+
+#### `allocateBuffer(size: number)`
+- **Module**: Memory Module
+- **Purpose**: Allocates memory buffer
+- **Location**: `src/memory/allocator.ext:112`
+- **Documentation**: [View →](../api-reference/module-memory/functions.md#allocatebuffer)
+
+### Classes
+
+#### `ApiClient`
+- **Module**: HTTP Module
+- **Purpose**: HTTP client for API requests
+- **Location**: `src/http/client.ext:25`
+- **Documentation**: [View →](../api-reference/module-http/classes.md#apiclient)
+
+#### `Application`
+- **Module**: Core Module
+- **Purpose**: Main application class
+- **Location**: `src/core/app.ext:10`
+- **Documentation**: [View →](../api-reference/module-core/classes.md#application)
+
+### Types
+
+#### `ApiResponse`
+- **Module**: HTTP Module
+- **Type**: Interface
+- **Location**: `src/http/types.ext:15`
+- **Documentation**: [View →](../api-reference/module-http/classes.md#apiresponse)
+
+---
+
+## B
+
+### Functions
+
+#### `buildConfig(options: ConfigOptions)`
+- **Module**: Config Module
+- **Purpose**: Builds configuration object
+- **Location**: `src/config/builder.ext:30`
+- **Documentation**: [View →](../api-reference/module-config/functions.md#buildconfig)
+
+### Classes
+
+#### `Buffer`
+- **Module**: Memory Module
+- **Purpose**: Memory buffer management
+- **Location**: `src/memory/buffer.ext:20`
+- **Documentation**: [View →](../api-reference/module-memory/classes.md#buffer)
+
+---
+
+## C
+
+### Functions
+
+#### `calculateChecksum(data: Buffer)`
+- **Module**: Utils Module
+- **Purpose**: Calculates data checksum
+- **Location**: `src/utils/crypto.ext:88`
+- **Documentation**: [View →](../api-reference/module-utils/functions.md#calculatechecksum)
+
+#### `cleanup()`
+- **Module**: Core Module
+- **Purpose**: Cleanup system resources
+- **Location**: `src/core/lifecycle.ext:150`
+- **Documentation**: [View →](../api-reference/module-core/functions.md#cleanup)
+
+#### `connect(config: ConnectionConfig)`
+- **Module**: Database Module
+- **Purpose**: Establishes database connection
+- **Location**: `src/db/connection.ext:40`
+- **Documentation**: [View →](../api-reference/module-db/functions.md#connect)
+
+### Classes
+
+#### `Configuration`
+- **Module**: Config Module
+- **Purpose**: Configuration container
+- **Location**: `src/config/config.ext:15`
+- **Documentation**: [View →](../api-reference/module-config/classes.md#configuration)
+
+#### `Connection`
+- **Module**: Database Module
+- **Purpose**: Database connection wrapper
+- **Location**: `src/db/connection.ext:10`
+- **Documentation**: [View →](../api-reference/module-db/classes.md#connection)
+
+---
+
+## D
+
+### Functions
+
+#### `decodeData(encoded: string)`
+- **Module**: Utils Module
+- **Purpose**: Decodes encoded data
+- **Location**: `src/utils/encoding.ext:55`
+- **Documentation**: [View →](../api-reference/module-utils/functions.md#decodedata)
+
+### Classes
+
+#### `DataProcessor`
+- **Module**: Processing Module
+- **Purpose**: Main data processor
+- **Location**: `src/processing/processor.ext:30`
+- **Documentation**: [View →](../api-reference/module-processing/classes.md#dataprocessor)
+
+#### `Database`
+- **Module**: Database Module
+- **Purpose**: Database abstraction layer
+- **Location**: `src/db/database.ext:25`
+- **Documentation**: [View →](../api-reference/module-db/classes.md#database)
+
+---
+
+[Continue alphabetically through Z...]
+
+## E - Z
+
+[Similar format for remaining letters...]
+
+---
+
+## By Module
+
+### Core Module
+**Functions**: [N]
+- `cleanup()` - Cleanup resources
+- `initialize()` - Initialize system
+- `shutdown()` - Shutdown system
+
+**Classes**: [N]
+- `Application` - Main application
+- `Configuration` - Config container
+
+---
+
+### HTTP Module
+**Functions**: [N]
+- `makeRequest()` - Make HTTP request
+- `parseResponse()` - Parse response
+
+**Classes**: [N]
+- `ApiClient` - HTTP client
+- `Request` - Request wrapper
+- `Response` - Response wrapper
+
+---
+
+[Continue for all modules...]
+
+---
+
+## By Type
+
+### Functions by Category
+
+**Initialization**: `initialize()`, `setup()`, `configure()`
+
+**Processing**: `processData()`, `transform()`, `validate()`
+
+**I/O**: `read()`, `write()`, `fetch()`
+
+**Cleanup**: `cleanup()`, `destroy()`, `close()`
+
+### Classes by Category
+
+**Core**: `Application`, `Service`, `Manager`
+
+**Data**: `DataProcessor`, `Transformer`, `Validator`
+
+**Network**: `ApiClient`, `Server`, `Connection`
+
+**Utilities**: `Logger`, `Cache`, `Helper`
+
+---
+
+## Search Tips
+
+- **Find function**: Search for function name (e.g., "processData")
+- **Find by module**: Search for module name (e.g., "HTTP Module")
+- **Find by purpose**: Search for keywords (e.g., "process", "connection")
+- **Jump to docs**: Click "View →" links
+
+---
+
+*Last updated: [Date]*
+
+*[Back to Main Index](../index.md)*
+```
+
+---
+
+#### Template 10: Test Coverage (`reference/test-coverage.md`)
+
+```markdown
+# Test Coverage
+
+Testing strategy, coverage analysis, and test documentation.
+
+## Summary
+
+- **Total Test Files**: [N]
+- **Total Test Cases**: [N]
+- **Modules with Tests**: [X]% ([N]/[Total])
+- **Estimated Coverage**: ~[X]%
+- **Test Frameworks**: [List frameworks]
+
+---
+
+## Coverage Overview
+
+### By Module
+
+| Module | Test Files | Test Cases | Coverage | Status |
+|--------|------------|------------|----------|--------|
+| Core | 8 | 125 | 95% | ✅ Excellent |
+| Module A | 15 | 203 | 85% | ✅ Good |
+| Module B | 8 | 95 | 65% | ⚠️ Medium |
+| Module C | 3 | 42 | 30% | ❌ Low |
+| Module D | 0 | 0 | 0% | ❌ None |
+| Utils | 12 | 150 | 90% | ✅ Excellent |
+
+**Overall Coverage**: [X]%
+
+### Coverage Distribution
+
+```
+Coverage:
+90-100%  ████████████████████████░░░░░░░░░░ 40%  (Excellent)
+70-89%   ████████████░░░░░░░░░░░░░░░░░░░░░░ 30%  (Good)
+50-69%   ████████░░░░░░░░░░░░░░░░░░░░░░░░░░ 20%  (Medium)
+0-49%    ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 10%  (Poor)
+```
+
+### Visual Progress
+
+```
+                Coverage
+Module A    ████████████████████░░░░░░░░  85%
+Module B    ████████████████░░░░░░░░░░░░  65%
+Module C    ████████░░░░░░░░░░░░░░░░░░░░  30%
+Module D    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
+Core        ████████████████████████░░░░  95%
+Utils       ██████████████████████░░░░░░  90%
+```
+
+---
+
+## Testing Frameworks
+
+### Primary Framework
+- **Name**: [e.g., Catch2 / pytest / Jest / JUnit]
+- **Version**: [X.Y.Z]
+- **Configuration**: `test/config.ext`
+
+### Additional Tools
+- **Mocking**: [Framework name]
+- **Coverage Tool**: [Tool name]
+- **CI Integration**: [GitHub Actions / GitLab CI / Jenkins]
+
+---
+
+## Detailed Coverage by Module
+
+### Core Module - 95% Coverage ✅
+
+**Test Location**: `test/core/`
+
+**Test Files**:
+- `test/core/application_test.ext` (45 test cases)
+- `test/core/lifecycle_test.ext` (35 test cases)
+- `test/core/config_test.ext` (25 test cases)
+- `test/core/integration_test.ext` (20 test cases)
+
+**Tested Components**:
+
+#### Functions
+- ✅ `initialize()` - 15 test cases
+  - Covers: normal init, invalid config, resource failure
+- ✅ `shutdown()` - 10 test cases
+  - Covers: clean shutdown, forced shutdown, error during shutdown
+- ✅ `configure()` - 8 test cases
+  - Covers: valid config, invalid values, missing required fields
+- ⚠️ `internalSetup()` - 2 test cases (needs more edge cases)
+
+#### Classes
+- ✅ `Application` - 25 test cases
+  - Constructor: 5 cases
+  - Methods: 20 cases
+- ✅ `Configuration` - 15 test cases
+
+**Untested Components**:
+- ❌ `debugHelper()` - Internal debug function (low priority)
+- ❌ `deprecatedFunction()` - Marked for removal
+
+**Coverage Assessment**: **Excellent** - All critical paths tested
+
+---
+
+### Module A - 85% Coverage ✅
+
+**Test Location**: `test/module-a/`
+
+**Test Files**:
+- `test/module-a/processor_test.ext` (80 test cases)
+- `test/module-a/validator_test.ext` (45 test cases)
+- `test/module-a/transformer_test.ext` (38 test cases)
+- `test/module-a/api_test.ext` (30 test cases)
+- `test/module-a/integration_test.ext` (10 test cases)
+
+**Tested Components**:
+
+#### Functions
+- ✅ `processData()` - 35 test cases
+  - Normal cases: 15
+  - Edge cases: 12
+  - Error cases: 8
+- ✅ `validateInput()` - 25 test cases
+  - Valid inputs: 10
+  - Invalid inputs: 15
+- ✅ `transformData()` - 18 test cases
+- ⚠️ `helperFunction1()` - 3 test cases (needs expansion)
+- ❌ `helperFunction2()` - Not tested
+- ❌ `internalUtil()` - Not tested
+
+#### Classes
+- ✅ `DataProcessor` - 45 test cases
+- ✅ `Validator` - 20 test cases
+- ⚠️ `InternalProcessor` - 5 test cases (internal class, limited testing)
+
+**Critical Gaps**:
+1. `helperFunction2()` - Used by `processData()`, should be tested
+2. Error recovery in `transformData()` - Only happy path tested
+
+**Coverage Assessment**: **Good** - Most important functionality covered
+
+---
+
+### Module B - 65% Coverage ⚠️
+
+**Test Location**: `test/module-b/`
+
+**Test Files**:
+- `test/module-b/core_test.ext` (50 test cases)
+- `test/module-b/api_test.ext` (30 test cases)
+- `test/module-b/integration_test.ext` (15 test cases)
+
+**Tested Components**:
+
+#### Functions
+- ✅ `mainFunction()` - 20 test cases
+- ⚠️ `secondaryFunction()` - 5 test cases (insufficient)
+- ❌ `helperA()` - Not tested
+- ❌ `helperB()` - Not tested
+- ❌ `helperC()` - Not tested
+
+#### Classes
+- ✅ `MainClass` - 30 test cases
+- ⚠️ `HelperClass` - 8 test cases (needs more)
+
+**Critical Gaps**:
+1. **Helper functions** - 5 helper functions untested
+2. **Edge cases** - Many edge cases not covered
+3. **Error handling** - Limited error scenario testing
+
+**Priority Actions**:
+1. Add tests for helper functions (3-4 hours)
+2. Add edge case tests (2-3 hours)
+3. Add error handling tests (2 hours)
+
+**Coverage Assessment**: **Medium** - Basic functionality covered, needs expansion
+
+---
+
+### Module C - 30% Coverage ❌
+
+**Test Location**: `test/module-c/`
+
+**Test Files**:
+- `test/module-c/basic_test.ext` (25 test cases)
+- `test/module-c/api_test.ext` (17 test cases)
+
+**Tested Components**:
+- ✅ `basicFunction()` - 15 test cases
+- ⚠️ `importantFunction()` - 5 test cases (critical, needs more)
+- ❌ `criticalProcess()` - **Not tested** (HIGH PRIORITY)
+- ❌ `dataValidator()` - **Not tested** (HIGH PRIORITY)
+- ❌ 8 other functions - Not tested
+
+**Classes**:
+- ⚠️ `CoreClass` - 10 test cases (insufficient)
+- ❌ `ProcessorClass` - Not tested
+- ❌ 3 other classes - Not tested
+
+**Critical Gaps**:
+1. **`criticalProcess()`** - Core functionality, no tests! 🚨
+2. **`dataValidator()`** - Data integrity, no tests! 🚨
+3. **Most classes** - Minimal or no coverage
+
+**Priority Actions** (URGENT):
+1. ⛔ Add tests for `criticalProcess()` - **Immediate** (4-6 hours)
+2. ⛔ Add tests for `dataValidator()` - **Immediate** (3-4 hours)
+3. ⚠️ Add tests for remaining functions (8-10 hours)
+
+**Coverage Assessment**: **Low** - Critical gaps, immediate attention needed
+
+---
+
+### Module D - 0% Coverage ❌
+
+**Test Location**: None
+
+**Status**: ⛔ **No tests at all**
+
+**Components** (all untested):
+- 12 functions
+- 5 classes
+- Critical module with no test coverage
+
+**Priority Actions** (CRITICAL):
+1. ⛔ Create basic test suite - **Immediate** (1-2 days)
+2. ⛔ Test all public APIs (2-3 days)
+3. Add integration tests (1 day)
+
+**Coverage Assessment**: **None** - Critical issue
+
+---
+
+## Untested Critical Components
+
+### High Priority (Immediate Action Required)
+
+1. **Module C - `criticalProcess()`** 🚨
+   - **Severity**: Critical
+   - **Impact**: Core functionality
+   - **Risk**: High - production issues likely
+   - **Action**: Write comprehensive test suite
+   - **Effort**: 4-6 hours
+
+2. **Module C - `dataValidator()`** 🚨
+   - **Severity**: Critical
+   - **Impact**: Data integrity
+   - **Risk**: High - data corruption possible
+   - **Action**: Write validation test suite
+   - **Effort**: 3-4 hours
+
+3. **Module D - All Components** 🚨
+   - **Severity**: Critical
+   - **Impact**: Entire module
+   - **Risk**: Very High - unknown behavior
+   - **Action**: Create full test suite
+   - **Effort**: 3-5 days
+
+### Medium Priority
+
+4. **Module B - Helper Functions** ⚠️
+   - 5 helper functions untested
+   - Used by tested functions
+   - **Effort**: 3-4 hours
+
+5. **Module A - Error Recovery** ⚠️
+   - Error handling paths not fully tested
+   - **Effort**: 2-3 hours
+
+---
+
+## Test Coverage Goals
+
+### Current State
+- **Overall Coverage**: [X]%
+- **Critical Path Coverage**: ~[Y]%
+- **Edge Case Coverage**: ~[Z]%
+
+### Target State (Q1)
+- **Overall Coverage**: 80%+
+- **Critical Path Coverage**: 100%
+- **Edge Case Coverage**: 70%+
+
+### Action Plan
+
+#### Sprint 1 (Current)
+- ⛔ Module D: Create basic test suite (Critical)
+- ⛔ Module C: Test `criticalProcess()` (Critical)
+- ⛔ Module C: Test `dataValidator()` (Critical)
+
+**Effort**: 5-7 days
+
+#### Sprint 2
+- ⚠️ Module C: Expand coverage to 60%+
+- ⚠️ Module B: Test helper functions
+- Improve error handling tests across modules
+
+**Effort**: 3-4 days
+
+#### Sprint 3
+- Module C: Reach 80% coverage
+- Module B: Reach 80% coverage
+- Add performance tests
+
+**Effort**: 2-3 days
+
+---
+
+## Testing Best Practices
+
+### Current Practices ✅
+
+- ✅ Unit tests for most modules
+- ✅ Integration tests for core functionality
+- ✅ Consistent naming convention
+- ✅ Clear test organization
+
+### Needs Improvement ⚠️
+
+- ⚠️ Edge case coverage
+- ⚠️ Error handling tests
+- ⚠️ Performance/load tests
+- ⚠️ Test documentation
+
+### Recommendations
+
+1. **Add edge case tests**
+   - Boundary conditions
+   - Null/empty inputs
+   - Large datasets
+
+2. **Improve error handling tests**
+   - All error paths
+   - Recovery scenarios
+   - Error messages
+
+3. **Add integration tests**
+   - Cross-module interactions
+   - End-to-end workflows
+
+4. **Performance tests**
+   - Load testing
+   - Stress testing
+   - Benchmark tests
+
+---
+
+## Test Quality Metrics
+
+### Test Characteristics
+
+- **Average Test LOC**: [X] lines
+- **Test-to-Code Ratio**: 1:[Y] (tests to production code)
+- **Test Execution Time**: [X] seconds (full suite)
+- **Flaky Tests**: [N] tests (target: 0)
+
+### Test Smells (Issues Found)
+
+1. **Long tests** (>50 LOC): [N] tests
+   - Should be split into smaller tests
+
+2. **Duplicate tests**: [N] cases
+   - Should use parameterized tests
+
+3. **Tests without assertions**: [N] cases
+   - Should be fixed or removed
+
+---
+
+## CI/CD Integration
+
+### Current Setup
+
+- **CI Platform**: [GitHub Actions / GitLab CI / etc]
+- **Test Execution**: On every commit
+- **Coverage Reports**: Generated automatically
+- **Coverage Threshold**: [X]% (must pass)
+
+### Test Pipeline
+
+```
+1. Commit pushed
+   ↓
+2. CI triggered
+   ↓
+3. Build project
+   ↓
+4. Run tests
+   ├─ Unit tests
+   ├─ Integration tests
+   └─ Coverage analysis
+   ↓
+5. Generate reports
+   ↓
+6. Check threshold
+   ├─ Pass → Merge allowed
+   └─ Fail → Block merge
+```
+
+---
+
+## Recommendations Summary
+
+### Immediate (This Week)
+1. ⛔ Test Module D completely (3-5 days)
+2. ⛔ Test Module C critical functions (6-8 hours)
+3. ⛔ Set up coverage monitoring (2 hours)
+
+### Short-term (This Month)
+4. Expand Module C coverage to 60%+ (2-3 days)
+5. Add Module B helper tests (3-4 hours)
+6. Improve error handling tests (4-6 hours)
+
+### Long-term (This Quarter)
+7. Reach 80% overall coverage
+8. Add performance test suite
+9. Automate coverage reporting
+10. Establish testing guidelines
+
+---
+
+## Contact
+
+**Questions about tests?**
+- Check individual test files for examples
+- See [Testing Guide](../guides/testing-guide.md)
+- Contact: [Test Lead]
+
+---
+
+*[Back to Main Index](../index.md)*
+```
+
+---
+
+### Phase 4: Advanced Diagram Generation (15-20 minutes)
+
+**Objective**: Create detailed, code-level diagrams beyond basic C4.
+
+#### Enhanced Diagram Types
+
+##### 1. Function Call Graph
+
+```mermaid
+graph TB
+    subgraph "Entry Points"
+        main[main]
+        api[API Handler]
+    end
+    
+    subgraph "Core Logic"
+        init[initialize]
+        process[processData]
+        validate[validateInput]
+        transform[transformData]
+    end
+    
+    subgraph "Utilities"
+        log[logger]
+        error[errorHandler]
+    end
+    
+    main --> init
+    main --> process
+    api --> process
+    process --> validate
+    process --> transform
+    init --> log
+    process --> log
+    validate --> error
+    transform --> error
+    
+    style main fill:#90EE90
+    style api fill:#90EE90
+```
+
+##### 2. Class Inheritance Diagram
+
+[Already shown in previous templates]
+
+##### 3. Detailed Sequence Diagrams
+
+[Already shown in previous templates]
+
+##### 4. Data Flow Diagrams
+
+[Already shown in previous templates]
+
+##### 5. Module Dependency Graph
+
+[Already shown in previous templates]
+
+---
+
+### Phase 5: Quality Assurance & Enhancement (10-15 minutes)
+
+**Objective**: Validate documentation completeness and quality.
+
+#### Enhanced Quality Checklist
+
+- [ ] **Structure**: All documents created including API docs
+- [ ] **API Coverage**: All public functions/classes documented
+- [ ] **Code Examples**: Each API has usage examples
+- [ ] **Cross-References**: All internal links validated
+- [ ] **Navigation**: Index and symbol index complete
+- [ ] **Complexity**: Metrics calculated
+- [ ] **Tests**: Test coverage documented
+- [ ] **Diagrams**: All diagrams render correctly
+- [ ] **Consistency**: Uniform formatting
+- [ ] **Completeness**: No TODOs/placeholders
+
+#### Documentation Validation Script
+
+```bash
+#!/bin/bash
+# validate-docs.sh
+
+echo "Validating documentation..."
+
+# Check for broken links
+find docs/ -name "*.md" -exec grep -l '\[.*\](.*\.md' {} \; | while read file; do
+    # Extract and verify links
+    echo "Checking $file..."
+done
+
+# Check for incomplete sections
+echo "Checking for TODOs..."
+grep -r "TODO\|TBD\|XXX\|FIXME\|\[N\]\|\[X\]" docs/
+
+# Validate Mermaid diagrams
+echo "Listing Mermaid diagrams..."
+grep -r "```mermaid" docs/ | wc -l
+
+echo "Validation complete!"
 ```
 
 ---
 
 ## Depth Handling and File Discovery
 
-### Key Principle: Separation of Concerns
+### Critical Principle
 
-The skill uses two different approaches for different purposes:
+1. **Visual Display** (tree) - May be depth-limited for readability
+2. **File Discovery** (Glob) - NEVER depth-limited
 
-#### 1. **Visual Structure Display** (May be depth-limited)
-- **Purpose**: Human-readable overview of directory structure
-- **Tool**: `tree` command
-- **Depth Strategy**: Adaptive (2-6 levels based on project size)
-- **Reason**: Prevents overwhelming output, maintains readability
-
-#### 2. **File Discovery & Analysis** (NEVER depth-limited)
-- **Purpose**: Find and analyze ALL source files
-- **Tool**: Glob patterns (`**/*.ext`)
-- **Depth**: Unlimited - finds files at ANY nesting level
-- **Reason**: Ensures complete codebase coverage
-
-### How It Works in Practice
+**Guarantee**: ALL files at ANY depth are discovered and analyzed.
 
 ```bash
-# Example: Deep directory structure
-project/
-├── src/
-│   ├── core/
-│   │   ├── engine/
-│   │   │   ├── renderer/
-│   │   │   │   ├── opengl/
-│   │   │   │   │   ├── shaders/
-│   │   │   │   │   │   └── fragment.cpp    # 7 levels deep!
-```
-
-**Phase 1 - Visual Display**:
-```bash
-tree -L 3    # Shows only down to "engine/"
-```
-Output shows limited depth for readability.
-
-**BUT - File Discovery**:
-```bash
-Glob: **/*.cpp    # Finds fragment.cpp and ALL other .cpp files
-```
-This finds `src/core/engine/renderer/opengl/shaders/fragment.cpp` even though it's 7 levels deep!
-
-**Phase 2 - Analysis**:
-- Reads and analyzes `fragment.cpp` 
-- Includes it in module mapping
-- Documents it in architecture
-- **No files are ignored due to depth**
-
-### Guarantee
-
-**This skill WILL analyze ALL source files** regardless of directory depth:
-
-✅ Files at level 3: Analyzed  
-✅ Files at level 5: Analyzed  
-✅ Files at level 10: Analyzed  
-✅ Files at level 20: Analyzed  
-
-The only limitations are:
-- ❌ Files in excluded directories (node_modules, build, etc.)
-- ❌ Files excluded by ignore patterns
-- ⚠️ Context window size (very large projects may need batching)
-
-### Verification
-
-To verify all files are found:
-
-```bash
-# Count files at all depths
-find . -name "*.cpp" | wc -l
-
-# Compare with Glob result in documentation
-# Numbers should match
+# Visual: tree -L 3  (limited)
+# Discovery: **/*.ext  (unlimited)
 ```
 
 ---
@@ -1188,747 +3084,137 @@ find . -name "*.cpp" | wc -l
 
 ### Adding New Languages
 
-To add support for a new language:
+1. Update Language Detection Rules table
+2. Add Language-Specific Analysis Patterns
+3. Add API Documentation Extraction patterns
+4. Test with sample project
 
-1. **Update Language Detection Rules** (Section: Language Support Configuration)
-   - Add file extensions
-   - Add config file patterns
-   - Add entry point patterns
-   - Add package indicators
+### Adding New Features
 
-2. **Add Language-Specific Analysis Patterns** (Section: Language-Specific Analysis Patterns)
-   - Module discovery approach
-   - Import/dependency syntax
-   - Documentation focus points
+Example: Add performance profiling
 
-3. **Update Phase 1.3** (Configuration file Glob patterns)
-
-4. **Update Phase 1.4** (Entry point patterns)
-
-5. **Update Phase 2.1** (Module structure identification)
-
-6. **Test** with representative projects
-
-### Adding New Diagram Types
-
-To add new diagram types:
-
-1. Add to **Diagram Type Selection Guide** (Phase 4)
-2. Create example template
-3. Document use cases
-4. Add to best practices if needed
-
-### Extending Templates
-
-To modify documentation templates:
-
-1. Edit relevant template in **Phase 3**
-2. Maintain consistent structure
-3. Update Quality Checklist if validation changes
-4. Update Generation Summary if output changes
+1. Add Phase 2 step for profiling data extraction
+2. Create `reference/performance.md` template
+3. Add to main index
+4. Update generation summary
 
 ---
 
-## Usage Patterns
+## Advanced Features Summary
 
-### Quick Start: Small Project
+### DeepWiki-Level Capabilities
 
-```
-User: "Generate docs for this project"
-
-Response:
-1. Scan: tree + config files (Phase 1)
-2. Detect: Language and architecture type
-3. Generate: 3 main docs + 2-3 component docs
-4. Time: ~20-30 minutes
-```
-
-### Medium Project: Multi-Module
-
-```
-User: "Document this application"
-
-Response:
-1. Scan: Full structure + LOC count
-2. Analyze: All modules + dependencies
-3. Generate: 3 main docs + 5-8 component docs
-4. Time: ~40-60 minutes
-```
-
-### Large Codebase Strategy
-
-For projects >1000 files or >50K LOC:
-
-1. **Phase 1**: Standard discovery
-2. **Phase 2**: Focus on main modules (top 10-15)
-3. **Phase 3**: Generate core docs + selective deep dives
-4. **Iteration**: Multiple passes if needed
-5. **Time**: 60-90 minutes or multiple sessions
-
----
-
-## Context Window Management
-
-### Optimization Strategies
-
-1. **Selective Reading**: Read only key files identified in Phase 1
-2. **Batch Processing**: Analyze 10-20 files at a time
-3. **Progressive Generation**: Create docs incrementally
-4. **Save Frequently**: Write docs as you go
-5. **Prioritize**: Core modules before peripheral code
-
-**Important**: File discovery is unlimited depth, but reading strategy adapts to context window:
-- Small files (<500 lines): Read fully
-- Large files (>500 lines): Read selectively (headers, key functions)
-- Very large codebases: Prioritize core modules, document others summarily
-
-### Token Budget Awareness
-
-- **Phase 1**: ~10-15K tokens (discovery + structure)
-- **Phase 2**: ~20-30K tokens (architecture analysis)
-- **Phase 3**: ~40-60K tokens (doc generation)
-- **Phase 4**: ~10K tokens (diagram creation)
-- **Phase 5**: ~5K tokens (QA + summary)
-- **Reserve**: ~20K tokens for unexpected needs
-
-### File Reading Limits
-
-- **Small files** (<500 lines): Read fully
-- **Medium files** (500-2000 lines): Read selectively (key sections)
-- **Large files** (>2000 lines): Scan headers/interfaces only
-
-### Batching Strategy
-
-When processing many files:
-1. Group by module/directory
-2. Process 10-15 files per batch
-3. Generate partial docs after each batch
-4. Merge at the end
-
----
-
-## Error Handling
-
-### Common Issues and Solutions
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| File not found | Wrong path/pattern | Use Glob to locate, verify path |
-| Too many files | Large codebase | Apply filters, focus on core modules |
-| Context limit hit | Reading too much | Selective reading, batch processing |
-| Unknown tech stack | Unfamiliar language | Focus on structure, file naming |
-| Mermaid syntax error | Invalid diagram | Validate syntax, simplify diagram |
-| Missing dependencies | Incomplete scan | Re-scan with broader patterns |
-
-### Fallback Strategies
-
-If primary approach fails:
-
-1. **No build tool detected**: Infer from file structure
-2. **No entry point found**: Use most complex/referenced file
-3. **Too complex to diagram**: Use simpler graph types
-4. **Incomplete analysis**: Document what's known, flag gaps
-
-### Issue: "Directory structure too deep to analyze"
-
-**Symptoms**: Cannot see full project structure with `-L 3`
-
-**Solutions**:
-1. **Increase tree depth**: Use `-L 5` or `-L 10` for deeper analysis
-2. **Remove depth limit**: Use `find . -type d` without `maxdepth`
-3. **Targeted deep dive**: First get overview at `-L 3`, then explore specific paths:
-   ```bash
-   # Overview first
-   tree -L 3
-   
-   # Then dive into specific modules
-   tree -L 10 src/module_name
-   tree -L 10 include/specific_component
-   ```
-4. **Use Glob patterns**: `**/*.cpp` will find files at any depth
-5. **Module-by-module**: Analyze each top-level module separately with full depth
-
-### Issue: "Unknown language or framework"
-
-**Symptoms**: Cannot identify tech stack
-
-**Solutions**:
-1. Look for README or documentation
-2. Check file extensions and imports
-3. Assume generic structure
-4. Focus on file organization over specifics
-
-### Issue: "C/C++ files not detected"
-
-**Symptoms**: Missing `.cc`, `.cxx`, `.hh` files in analysis
-
-**Solutions**:
-1. Verify all extensions are included in patterns:
-   - Source: `.c`, `.cpp`, `.cc`, `.cxx`, `.c++`
-   - Header: `.h`, `.hpp`, `.hh`, `.hxx`, `.h++`
-2. Use comprehensive Glob patterns: `**/*.{c,cpp,cc,cxx,c++,h,hpp,hh,hxx,h++}`
-3. Check if files are being excluded by ignore patterns
-4. Manually specify file patterns if auto-detection fails
-
-### Issue: "Documentation too generic"
-
-**Symptoms**: Lacks project-specific details
-
-**Solutions**:
-1. Read more source files for context
-2. Analyze business logic files
-3. Include code examples
-4. Review and add domain knowledge manually
+✅ **C4 Level 4** - Function/class documentation
+✅ **API Reference** - Complete auto-generated API docs  
+✅ **Call Graphs** - Function call relationships  
+✅ **Class Diagrams** - Inheritance hierarchies  
+✅ **Complexity Analysis** - Code metrics  
+✅ **Symbol Index** - Searchable symbol database  
+✅ **Test Coverage** - Testing documentation  
+✅ **Navigation** - Cross-referenced structure  
+✅ **Examples** - Usage examples for all APIs  
 
 ---
 
 ## Best Practices
 
-### Documentation Quality
-
-1. **Clarity**: Use clear, jargon-free language where possible
-2. **Completeness**: Cover all major components
-3. **Accuracy**: Verify technical details
-4. **Consistency**: Maintain uniform style and structure
-5. **Maintainability**: Structure for easy updates
-
-### Diagram Quality
-
-1. **Simplicity**: One concept per diagram
-2. **Relevance**: Only include necessary elements
-3. **Readability**: Clear labels and relationships
-4. **Hierarchy**: Use appropriate C4 levels
-5. **Context**: Explain diagram purpose
-
-### Code Analysis
-
-1. **Entry points first**: Understand main flows
-2. **Core logic focus**: Prioritize business logic
-3. **Pattern recognition**: Identify common patterns
-4. **Dependency mapping**: Track relationships
-5. **Testing coverage**: Note test strategies
-
----
-
-## Usage Examples
-
-### Example 1: C/C++ Library Project
-
-**Scenario**: User wants to document a C++ library
-
-**Execution**:
-
-```
-Phase 1: Discovery
-- Find CMakeLists.txt
-- Identify include/ and src/ structure
-- Detect: Static library using CMake
-- Count: ~5K LOC
-
-Phase 2: Analysis
-- Map header files (public API)
-- Identify implementation files
-- Detect: RAII patterns, template usage
-- Find: 3 main modules
-
-Phase 3: Documentation
-- Project Overview: Library purpose, build instructions
-- Architecture: Module dependencies, API surface
-- Workflow: Library usage patterns
-- Deep Dive: Each module (3 docs)
-
-Phase 4: Diagrams
-- System context: Library + applications
-- Component diagram: Module relationships
-- Class diagrams: Key classes per module
-
-Result: 4 core docs + 3 deep dives, 8 diagrams
-```
-
-### Example 2: Rust Microservice
-
-**Scenario**: User needs docs for a Rust web service
-
-**Execution**:
-
-```
-Phase 1: Discovery
-- Find Cargo.toml with dependencies (actix-web, sqlx)
-- Identify: Web API service
-- Count: ~8K LOC
-
-Phase 2: Analysis
-- Map: routes/, models/, services/, db/
-- Detect: Layered architecture (routes → services → db)
-- Find: REST API with PostgreSQL
-
-Phase 3: Documentation
-- Project Overview: API purpose, endpoints
-- Architecture: 3-tier layered architecture
-- Workflow: Request/response flows
-- Deep Dive: Routes, services, data layer (3 docs)
-
-Phase 4: Diagrams
-- System context: API + clients + database
-- Container: Service + DB
-- Component: Internal layers
-- Sequence: Key API flows
-
-Result: 4 core docs + 3 deep dives, 9 diagrams
-```
-
-### Example 3: Python Data Pipeline
-
-**Scenario**: Document a data processing pipeline
-
-**Execution**:
-
-```
-Phase 1: Discovery
-- Find: setup.py, requirements.txt
-- Identify: Data pipeline with pandas, airflow
-- Count: ~3K LOC
-
-Phase 2: Analysis
-- Map: ingest/, transform/, load/, config/
-- Detect: ETL pipeline pattern
-- Find: Scheduled batch processing
-
-Phase 3: Documentation
-- Project Overview: Pipeline purpose, data sources
-- Architecture: ETL stages and orchestration
-- Workflow: Data flow from source to destination
-- Deep Dive: Each ETL stage (3 docs)
-
-Phase 4: Diagrams
-- System context: Data sources + pipeline + targets
-- Data flow: ETL process flow
-- State diagram: Job states
-- Sequence: Pipeline execution
-
-Result: 4 core docs + 3 deep dives, 7 diagrams
-```
-
-### Example 4: Java Spring Boot Application
-
-**Scenario**: Enterprise Java application documentation
-
-**Execution**:
-
-```
-Phase 1: Discovery
-- Find: pom.xml with Spring Boot dependencies
-- Identify: REST API with Spring framework
-- Count: ~12K LOC
-
-Phase 2: Analysis
-- Map: controllers/, services/, repositories/, entities/
-- Detect: Spring MVC + Spring Data JPA
-- Find: RESTful web service with MySQL
-
-Phase 3: Documentation
-- Project Overview: Application purpose, Spring stack
-- Architecture: Spring layers (controller/service/repo)
-- Workflow: Request processing flow
-- Deep Dive: Controllers, services, data (3 docs)
-
-Phase 4: Diagrams
-- System context: Application + database + clients
-- Container: Spring Boot app + MySQL
-- Component: Spring layers
-- Sequence: API request flow
-- Class: Key domain models
-
-Result: 4 core docs + 3 deep dives, 10 diagrams
-```
-
-### Example 5: TypeScript React Application
-
-**Scenario**: Frontend application documentation
-
-**Execution**:
-
-```
-Phase 1: Discovery
-- Find: package.json with React, TypeScript
-- Identify: SPA with React + Redux
-- Count: ~6K LOC
-
-Phase 2: Analysis
-- Map: components/, pages/, store/, services/
-- Detect: Component-based UI + Redux state management
-- Find: REST API integration
-
-Phase 3: Documentation
-- Project Overview: App purpose, tech stack
-- Architecture: Component hierarchy + state management
-- Workflow: User interactions and state changes
-- Deep Dive: Component groups, store, API (3 docs)
-
-Phase 4: Diagrams
-- System context: React app + backend API
-- Component tree: UI component hierarchy
-- State flow: Redux state management
-- Sequence: User interaction flows
-
-Result: 4 core docs + 3 deep dives, 8 diagrams
-```
-
----
-
-## Advanced Features
-
-### Multi-Language Projects
-
-For polyglot projects:
-
-1. **Identify all languages** in Phase 1
-2. **Create language-specific sections** in Architecture doc
-3. **Document inter-language communication** (FFI, IPC, RPC)
-4. **Show technology integration** in diagrams
-
-**Example Structure**:
-```
-Architecture Overview
-├── Frontend (TypeScript/React)
-├── Backend (Go)
-├── Data Layer (Python)
-└── Integration Points
-```
-
-### Monorepo Documentation
-
-For monorepos with multiple projects:
-
-1. **Root-level overview**: All projects and relationships
-2. **Per-project documentation**: Individual project docs
-3. **Shared components**: Common library documentation
-4. **Integration docs**: How projects interact
-
-**Directory Structure**:
-```
-docs/
-├── 0-monorepo-overview.md
-├── project-a/
-│   ├── 1-project-overview.md
-│   └── ...
-├── project-b/
-│   ├── 1-project-overview.md
-│   └── ...
-└── shared/
-    └── libraries.md
-```
-
-### Microservices Architecture
-
-For microservices:
-
-1. **System-level docs**: Overall architecture
-2. **Per-service docs**: Individual service documentation
-3. **API contracts**: Service interfaces and protocols
-4. **Deployment topology**: Service relationships and infrastructure
-
-**Key Diagrams**:
-- System context: All services and external systems
-- Service mesh: Inter-service communication
-- Deployment: Infrastructure and scaling
-
-### Legacy Code Documentation
-
-For undocumented legacy code:
-
-1. **Structure-first approach**: Map out file organization
-2. **Interface discovery**: Find public APIs and entry points
-3. **Pattern inference**: Identify implicit patterns
-4. **Gap documentation**: Note unclear areas for review
-5. **Modernization notes**: Suggest improvements
-
----
-
-## Tips for Optimal Results
-
 ### Before Generation
-
-1. **Clean the codebase**: Remove build artifacts, temp files
-2. **Update README**: Ensure basic info is current
-3. **Identify critical paths**: Know which components matter most
-4. **Check build status**: Ensure project is in working state
+1. Clean build artifacts
+2. Update README
+3. Identify critical components
 
 ### During Generation
-
-1. **Monitor progress**: Watch for errors or issues
-2. **Provide context**: Answer clarifying questions
-3. **Prioritize modules**: Guide which components to focus on
-4. **Review incrementally**: Check docs as they're generated
+1. Monitor progress
+2. Provide context
+3. Guide prioritization
 
 ### After Generation
-
-1. **Review accuracy**: Verify technical details
-2. **Add domain knowledge**: Include business context
-3. **Update diagrams**: Refine visualizations if needed
-4. **Link to code**: Add source file references
-5. **Version control**: Commit docs with code
-
-### Maintenance
-
-1. **Trigger points**: Regenerate docs when:
-   - Major refactoring occurs
-   - New modules added
-   - Architecture changes
-   - Quarterly review cycle
-
-2. **Incremental updates**: For small changes:
-   - Update specific sections manually
-   - Re-run Phase 2-3 for affected modules only
-
-3. **Keep synced**: Treat docs as code:
-   - Review in pull requests
-   - Automate generation in CI/CD
-   - Assign doc ownership
-
----
-
-## Limitations and Considerations
-
-### Current Limitations
-
-1. **Context Window**: Very large codebases (>10K files) may require multiple sessions
-2. **Diagram Complexity**: Mermaid has limits on node count and nesting
-3. **Pattern Detection**: May not catch all architectural patterns
-4. **Code Understanding**: Deep algorithmic logic may need manual review
-5. **Custom Frameworks**: Proprietary frameworks may not be recognized
-
-### Manual Review Needed For
-
-- **Security considerations**: Sensitive code paths
-- **Performance bottlenecks**: Critical optimization points
-- **Business logic**: Domain-specific rules and constraints
-- **API contracts**: Exact request/response formats
-- **Deployment specifics**: Production environment details
-
-### When to Use Alternative Tools
-
-Consider specialized tools for:
-
-- **API documentation**: Swagger/OpenAPI for REST APIs
-- **Code metrics**: SonarQube for quality metrics
-- **Dependency analysis**: Specialized dependency analyzers
-- **Architecture validation**: Fitness functions and ArchUnit
-- **Live documentation**: Tools that generate from code comments
-
----
-
-## Customization Guide
-
-### Adjusting Documentation Depth
-
-**Minimal Documentation** (Quick reference):
-- Generate only Phase 3 docs 1-3
-- Skip deep dives
-- Use simplified diagrams
-- Time: ~20 minutes
-
-**Standard Documentation** (Default):
-- All phases as described
-- Major components deep dives
-- Full diagram suite
-- Time: ~40-60 minutes
-
-**Comprehensive Documentation** (Complete coverage):
-- All phases with extended analysis
-- All components deep dives
-- Additional code-level docs (C4 Level 4)
-- Integration scenarios
-- Time: ~90-120 minutes
-
-### Template Customization
-
-To customize document templates:
-
-1. **Locate template** in Phase 3 section
-2. **Modify structure** as needed
-3. **Add/remove sections** based on needs
-4. **Maintain consistency** across documents
-
-**Common Customizations**:
-- Add "Security Considerations" section
-- Include "Performance Metrics" section
-- Add "API Reference" for libraries
-- Include "Deployment Guide" for services
-
-### Language-Specific Customization
-
-Add new patterns for existing languages:
-
-1. Find language in "Language-Specific Analysis Patterns"
-2. Add new patterns under "Documentation Focus"
-3. Update Phase 2.1 if module discovery changes
-4. Add examples in Usage Examples section
-
----
-
-## Integration with Development Workflow
-
-### CI/CD Integration
-
-Generate docs automatically:
-
-```yaml
-# Example GitHub Actions workflow
-name: Generate Documentation
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-
-jobs:
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Generate docs
-        run: |
-          # Run Claude Code with smart-docs skill
-          claude-code --skill smart-docs
-      - name: Commit docs
-        run: |
-          git add docs/
-          git commit -m "Update documentation"
-          git push
-```
-
-### Pull Request Documentation
-
-Include in PR workflow:
-1. Generate docs for changed modules
-2. Include in PR description
-3. Review docs alongside code
-4. Update before merge
-
-### Documentation Gates
-
-Quality gates:
-- Require docs for new modules
-- Validate diagram syntax
-- Check documentation coverage
-- Ensure cross-references work
+1. Review accuracy
+2. Add domain knowledge
+3. Update diagrams
+4. Link to code
+5. Version control
 
 ---
 
 ## Troubleshooting
 
-### Issue: "Cannot find main entry point"
+### Issue: "Too many functions to document"
 
-**Symptoms**: Phase 1 cannot identify project entry
+**Solution**:
+- Group similar functions
+- Focus on public API
+- Use tables for simple functions
+- Document patterns, not every variation
 
-**Solutions**:
-1. Look for alternative entry points (test files, examples)
-2. Check build configuration for custom entry points
-3. Use directory structure as fallback
-4. Manually specify entry point location
+### Issue: "Call graph too complex"
 
-### Issue: "Too many files to analyze"
+**Solution**:
+- Show only top-level
+- Create focused subgraphs
+- Limit to 15-20 nodes
+- Multiple smaller diagrams
 
-**Symptoms**: Context limit warnings, incomplete analysis
+### Issue: "Cannot extract signatures automatically"
 
-**Solutions**:
-1. Exclude more directories (test, docs, examples)
-2. Focus on src/ or lib/ directory only
-3. Process modules one at a time
-4. Use multiple documentation passes
-
-### Issue: "Mermaid diagram won't render"
-
-**Symptoms**: Diagram syntax errors
-
-**Solutions**:
-1. Simplify diagram (remove nodes)
-2. Check for special characters in labels
-3. Use alternative diagram type
-4. Validate syntax at mermaid.live
+**Solution**:
+- Use best-effort grep patterns
+- Document major functions manually
+- Flag for review
+- Use language-specific parsers if available
 
 ---
 
-## Conclusion
+## Appendix: Command Reference
 
-This skill provides a comprehensive, extensible framework for generating professional software documentation. By following the structured phases and leveraging language-specific patterns, you can quickly create high-quality documentation for any codebase.
-
-### Key Takeaways
-
-1. **Progressive approach**: Analyze incrementally to manage complexity
-2. **Language extensibility**: Easy to add support for new languages
-3. **Structured output**: Consistent, professional documentation
-4. **C4 model compliance**: Industry-standard architecture documentation
-5. **Maintainable**: Single-document skill for easy updates
-6. **Depth-independent**: Analyzes ALL files regardless of directory nesting
-
-### Next Steps
-
-1. **Try it out**: Test on a sample project
-2. **Customize**: Adapt templates to your needs
-3. **Extend**: Add language support as needed
-4. **Integrate**: Include in your development workflow
-5. **Iterate**: Refine based on results
-
----
-
-## Appendix: Quick Reference
-
-### Command Cheat Sheet
+### Symbol Extraction
 
 ```bash
-# Project discovery
-tree -L 3 -I 'node_modules|target|build'  # Standard depth
-tree -L 5 -I 'node_modules|target|build'  # Deeper projects
-tree -L 10 src/                            # Deep dive specific module
-cloc . --exclude-dir=node_modules,target,build
+# C++
+grep -rn "^\s*\w\+\s\+\w\+\s*(" include/ src/
 
-# Find all source files (no depth limit)
-find . -type f -name "*.cpp" -o -name "*.cc" -o -name "*.cxx"
-find . -name "*.ext" | xargs wc -l
+# Python
+grep -rn "^def\s\+\w\+" src/
 
-# File patterns (work at any depth)
-**/{README,Readme,readme}.md
-**/CMakeLists.txt                    # C/C++
-**/*.{c,cpp,cc,cxx,c++}             # C/C++ source (all extensions)
-**/*.{h,hpp,hh,hxx,h++}             # C/C++ headers (all extensions)
-**/Cargo.toml                        # Rust
-**/package.json                      # JavaScript/TypeScript
-**/pom.xml                           # Java
-**/go.mod                            # Go
-**/setup.py                          # Python
-**/composer.json                     # PHP
+# TypeScript
+grep -rn "export\s\+\(function\|class\)" src/
+
+# Rust
+grep -rn "pub\s\+fn\s\+\w\+" src/
+
+# Java
+grep -rn "public\s\+.*\s\+\w\+\s*(" src/
+
+# Go
+grep -rn "^func\s\+\w\+" src/
+
+# PHP
+grep -rn "function\s\+\w\+" src/
 ```
 
-### Phase Checklist
+### Test Discovery
 
-- [ ] **Phase 1**: Project discovered, tech stack identified
-- [ ] **Phase 2**: Architecture analyzed, patterns detected
-- [ ] **Phase 3**: Core documents generated (1-3)
-- [ ] **Phase 4**: Diagrams created and validated
-- [ ] **Phase 5**: QA passed, summary provided
+```bash
+# Find test files
+find . -name "*test*" -o -name "*Test*" -o -name "*spec*"
 
-### Document Checklist
+# Count tests
+grep -r "test\|Test\|it(" test/ | wc -l
+```
 
-- [ ] 1-project-overview.md
-- [ ] 2-architecture-overview.md
-- [ ] 3-workflow-overview.md
-- [ ] 4-deep-dive/ (major components)
+### Complexity Analysis
 
-### Quality Checklist
-
-- [ ] All Mermaid diagrams render
-- [ ] No placeholder text remains
-- [ ] Cross-references work
-- [ ] Technical accuracy verified
-- [ ] Consistent formatting
-- [ ] Appropriate detail level
+```bash
+# Simple complexity heuristic
+# Count branches in a file
+grep -c "\(if\|for\|while\|switch\)" file.ext
+```
 
 ---
 
-**Version**: 2.0  
-**Last Updated**: 2025-01-14  
+**Version**: 2.0 (DeepWiki-Enhanced)  
+**Last Updated**: 2025-01-15  
+**Features**: C4 all levels, API docs, call graphs, complexity, tests  
 **Compatibility**: Claude Code, all mainstream languages  
 **License**: Use with Claude Code subscription  
 

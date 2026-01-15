@@ -1,0 +1,102 @@
+phase: architecture
+purpose: |
+  Analyze the internal structure of the codebase to infer
+  architectural components, dependencies, and system patterns.
+
+prerequisites:
+  - discovery.outputs.detected_languages
+  - discovery.outputs.high_level_project_map
+  - discovery.outputs.entry_points
+
+objectives:
+  - Identify logical modules and boundaries
+  - Analyze dependencies and interaction flows
+  - Detect high-level architectural patterns
+  - Prepare C4 model abstractions (without diagrams)
+
+analysis:
+
+  module_identification:
+    description: |
+      Identify major modules or components within the project.
+    signals:
+      - Directory boundaries
+      - Package or namespace definitions
+      - Build or dependency groupings
+    guidelines:
+      - Prefer logical cohesion over physical proximity
+      - Treat shared libraries as separate modules
+      - Distinguish core logic from infrastructure code
+
+  dependency_analysis:
+    description: |
+      Analyze dependencies between modules and external systems.
+    focus:
+      - Internal module dependencies
+      - External libraries and services
+      - Directionality of dependencies
+    guidelines:
+      - Identify tightly coupled components
+      - Note circular dependencies
+      - Highlight dependency inversion patterns
+
+  architectural_pattern_detection:
+    description: |
+      Infer architectural styles and patterns from structure and dependencies.
+    common_patterns:
+      - Layered architecture
+      - Modular monolith
+      - Microservices
+      - Event-driven architecture
+      - Hexagonal / Clean architecture
+    indicators:
+      - Folder layering conventions
+      - Interface-to-implementation ratios
+      - Messaging or event abstractions
+
+c4_models:
+
+  level_1_context:
+    description: |
+      Define the system context and its external actors.
+    elements:
+      - Primary users or clients
+      - External systems or services
+    scope_rules:
+      - Treat the whole codebase as a single system
+      - Exclude internal components
+
+  level_2_container:
+    description: |
+      Decompose the system into high-level containers.
+    elements:
+      - Applications
+      - Services
+      - Datastores
+    mapping_rules:
+      - Map deployable units to containers
+      - Group closely related modules
+
+  level_3_component:
+    description: |
+      Break down containers into major components.
+    elements:
+      - Key modules
+      - Core services
+      - Shared libraries
+    boundaries:
+      - Use module boundaries identified earlier
+      - Avoid over-fragmentation
+
+analysis_constraints:
+  - do_not_generate_markdown
+  - do_not_generate_mermaid
+  - do_not_finalize_document_structure
+
+outputs:
+  - identified_modules
+  - dependency_graph
+  - inferred_architecture_patterns
+  - c4_context_definition
+  - c4_container_definition
+  - c4_component_definition

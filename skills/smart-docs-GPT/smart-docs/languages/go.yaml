@@ -1,0 +1,83 @@
+language: go
+
+detection:
+  file_extensions:
+    - .go
+  config_files:
+    - go.mod
+    - go.sum
+  signals:
+    - Presence of main packages
+    - Module path definition in go.mod
+
+build_and_tooling:
+  primary:
+    - Go toolchain
+  module_system:
+    - Go modules
+
+project_structure:
+  common_layouts:
+    - cmd/
+    - internal/
+    - pkg/
+    - api/
+    - scripts/
+  conventions:
+    - Packages define module boundaries
+    - main packages define executables
+    - internal packages are non-public
+
+module_discovery:
+  description: |
+    Identify packages and binaries as primary architectural units.
+  signals:
+    - Package declarations
+    - Directory boundaries
+    - Multiple main packages under cmd/
+  guidelines:
+    - Treat each binary under cmd/ as a top-level component
+    - Group shared code under internal/ or pkg/
+    - Distinguish libraries from executables
+
+dependency_analysis:
+  focus:
+    - Internal package imports
+    - External module dependencies
+  sources:
+    - go.mod
+    - go.sum
+  considerations:
+    - Versioned modules
+    - Replace directives
+
+documentation_focus:
+  emphasize:
+    - Package responsibilities
+    - Public APIs and exported identifiers
+    - CLI commands and services
+  de_emphasize:
+    - Unexported helper functions
+    - Generated code
+
+special_considerations:
+  - Interface-based design
+  - Concurrency patterns (goroutines, channels)
+  - Context propagation
+
+depth_handling:
+  guidance:
+    - Start with binaries and high-level packages
+    - Dive deeper only for complex internal logic
+
+phase_constraints:
+  discovery:
+    - use_for_language_and_module_detection
+  architecture:
+    - use_for_package_and_binary_analysis
+  generation:
+    - guide_api_and_cli_documentation
+  diagrams:
+    - guide_package_and_component_visualization
+  qa:
+    - verify_package_dependency_and_api_consistency

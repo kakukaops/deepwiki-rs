@@ -1,0 +1,73 @@
+phase: diagrams
+purpose: |
+  Generate clear and accurate diagrams that visually represent
+  the system architecture, workflows, and component relationships.
+
+prerequisites:
+  - architecture.outputs.c4_context_definition
+  - architecture.outputs.c4_container_definition
+  - architecture.outputs.c4_component_definition
+  - generation.outputs.project_overview_doc
+  - generation.outputs.architecture_overview_doc
+
+objectives:
+  - Visualize system context, structure, and workflows
+  - Support written documentation with diagrams
+  - Maintain readability and consistency across diagrams
+
+diagram_types:
+
+  system_context:
+    description: |
+      Show the system in relation to users and external systems.
+    recommended_format:
+      - C4 Level 1
+    mermaid_type:
+      - flowchart
+      - graph
+
+  container_view:
+    description: |
+      Show high-level containers and their interactions.
+    recommended_format:
+      - C4 Level 2
+    mermaid_type:
+      - flowchart
+      - graph
+
+  component_view:
+    description: |
+      Show major components within a container.
+    recommended_format:
+      - C4 Level 3
+    mermaid_type:
+      - flowchart
+
+  workflow_view:
+    description: |
+      Illustrate key execution or data flows.
+    mermaid_type:
+      - sequenceDiagram
+      - flowchart
+
+diagram_selection_guidelines:
+  - Choose the simplest diagram that conveys the idea
+  - Avoid duplicating information already clear in text
+  - Prefer multiple simple diagrams over one complex diagram
+
+mermaid_best_practices:
+  - Use consistent naming across diagrams
+  - Limit the number of nodes per diagram
+  - Avoid deeply nested subgraphs
+  - Ensure diagrams render correctly in Markdown viewers
+
+diagram_constraints:
+  - do_not_infer_new_architecture
+  - do_not_validate_diagram_quality_here
+  - do_not_generate_markdown_documents
+
+outputs:
+  - system_context_diagrams
+  - container_diagrams
+  - component_diagrams
+  - workflow_diagrams

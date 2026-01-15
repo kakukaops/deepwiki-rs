@@ -1,0 +1,87 @@
+phase: generation
+purpose: |
+  Generate clear, structured, and professional documentation
+  based on the analyzed architecture and discovered project data.
+
+prerequisites:
+  - architecture.outputs.identified_modules
+  - architecture.outputs.inferred_architecture_patterns
+  - architecture.outputs.c4_context_definition
+  - architecture.outputs.c4_container_definition
+  - architecture.outputs.c4_component_definition
+
+objectives:
+  - Produce a complete set of technical documentation
+  - Ensure logical flow and clear separation of concerns
+  - Maintain consistency across all generated documents
+
+documentation_set:
+
+  project_overview:
+    intent: |
+      Provide a high-level introduction to the project.
+    should_include:
+      - Project purpose and scope
+      - Key features and responsibilities
+      - Primary technologies and frameworks
+    should_not_include:
+      - Low-level implementation details
+
+  architecture_overview:
+    intent: |
+      Explain the system architecture and major components.
+    should_include:
+      - Architectural style and rationale
+      - Major containers and components
+      - High-level interaction flows
+    dependencies:
+      - c4_models
+
+  workflow_overview:
+    intent: |
+      Describe key workflows and execution paths.
+    should_include:
+      - Core business flows
+      - Data movement between components
+      - External interactions
+    guidance:
+      - Focus on representative paths
+      - Avoid exhaustive edge cases
+
+  deep_dive:
+    intent: |
+      Document important modules or components in detail.
+    scope_rules:
+      - Select only critical or complex components
+      - Avoid duplicating architecture overview content
+    should_include:
+      - Responsibilities
+      - Key interfaces
+      - Internal logic summaries
+
+generation_rules:
+  - Maintain consistent terminology across documents
+  - Cross-link related sections where appropriate
+  - Prefer clarity over exhaustiveness
+  - Assume reader has general technical background
+
+output_organization:
+  directory_structure:
+    - docs/
+    - docs/architecture/
+    - docs/workflows/
+    - docs/components/
+  file_naming:
+    - use-kebab-case
+    - descriptive-and-consistent
+
+generation_constraints:
+  - do_not_generate_diagrams_here
+  - do_not_validate_quality_here
+  - do_not_inline_templates
+
+outputs:
+  - project_overview_doc
+  - architecture_overview_doc
+  - workflow_overview_doc
+  - deep_dive_docs

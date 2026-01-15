@@ -1,0 +1,100 @@
+language: php
+
+detection:
+  file_extensions:
+    - .php
+  config_files:
+    - composer.json
+    - composer.lock
+  signals:
+    - PSR-4 autoload configuration
+    - Presence of vendor/ directory
+    - Framework bootstrap files
+
+runtime_and_tooling:
+  runtimes:
+    - PHP
+  package_managers:
+    - Composer
+  tooling:
+    - PHPUnit
+    - PHPStan
+    - Psalm
+
+project_structure:
+  common_layouts:
+    - src/
+    - app/
+    - public/
+    - config/
+    - tests/
+  conventions:
+    - PSR-4 namespace-to-directory mapping
+    - Entry point via public/index.php
+    - Separation of domain, infrastructure, and presentation layers
+
+module_discovery:
+  description: |
+    Identify modules and components based on namespaces and directory structure.
+  signals:
+    - Namespace declarations
+    - Composer autoload rules
+    - Framework module or bundle definitions
+  guidelines:
+    - Treat top-level namespaces as modules
+    - Map namespaces to directory boundaries
+    - Distinguish framework code from application logic
+
+dependency_analysis:
+  focus:
+    - Internal namespace dependencies
+    - External Composer packages
+  sources:
+    - composer.json
+    - composer.lock
+  considerations:
+    - Production vs development dependencies
+    - Transitive dependencies managed by Composer
+
+documentation_focus:
+  emphasize:
+    - Module and namespace responsibilities
+    - Public classes and service contracts
+    - Configuration and runtime lifecycle
+  de_emphasize:
+    - Vendor code
+    - Generated cache or proxy files
+
+framework_patterns:
+  laravel:
+    - Service providers
+    - Controllers, middleware, and models
+  symfony:
+    - Bundles and services
+    - Dependency injection configuration
+  generic:
+    - MVC-style layering
+    - Event-driven extensions
+
+special_considerations:
+  - Dynamic typing with optional strict types
+  - Magic methods and properties
+  - Dependency injection containers
+  - Configuration via PHP, YAML, or ENV
+
+depth_handling:
+  guidance:
+    - Start from entry point and service container
+    - Expand into domain modules selectively
+
+phase_constraints:
+  discovery:
+    - detect_php_and_composer_usage
+  architecture:
+    - analyze_namespace_and_module_structure
+  generation:
+    - document_services_and_public_apis
+  diagrams:
+    - visualize_module_and_dependency_relationships
+  qa:
+    - verify_namespace_and_dependency_consistency

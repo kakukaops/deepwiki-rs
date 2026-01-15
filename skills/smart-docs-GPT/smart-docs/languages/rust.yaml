@@ -1,0 +1,89 @@
+language: rust
+aliases:
+  - rs
+
+detection:
+  file_extensions:
+    - .rs
+  config_files:
+    - Cargo.toml
+    - Cargo.lock
+  signals:
+    - Presence of src/main.rs or src/lib.rs
+    - Cargo workspace configuration
+
+build_system:
+  primary:
+    - Cargo
+  workspace_detection:
+    - [workspace] section in Cargo.toml
+    - Multiple crates under a single repository
+
+project_structure:
+  standard_layout:
+    - src/main.rs
+    - src/lib.rs
+    - src/bin/
+    - src/modules/
+    - tests/
+    - examples/
+  conventions:
+    - Crates define primary module boundaries
+    - Modules organized via mod.rs or inline modules
+    - Public APIs exposed via pub items
+
+module_discovery:
+  description: |
+    Identify crates and modules as primary architectural units.
+  signals:
+    - Cargo.toml package definitions
+    - Workspace members
+    - Module trees defined by mod statements
+  guidelines:
+    - Treat each crate as a top-level module
+    - Distinguish library crates from binary crates
+    - Identify shared crates used across binaries
+
+dependency_analysis:
+  focus:
+    - Crate-to-crate dependencies
+    - External crates from crates.io
+  sources:
+    - [dependencies]
+    - [dev-dependencies]
+    - [build-dependencies]
+  considerations:
+    - Feature flags and optional dependencies
+    - Version constraints and overrides
+
+documentation_focus:
+  emphasize:
+    - Crate responsibilities
+    - Public APIs and traits
+    - Feature flags and conditional behavior
+  de_emphasize:
+    - Internal helper modules
+    - Generated code
+
+special_considerations:
+  - Lifetimes and ownership concepts
+  - Trait-based abstractions
+  - Macros and procedural macros
+  - Unsafe blocks and safety boundaries
+
+depth_handling:
+  guidance:
+    - Start with crate-level documentation
+    - Dive into modules only for complex logic
+
+phase_constraints:
+  discovery:
+    - use_for_language_and_workspace_detection
+  architecture:
+    - use_for_crate_and_module_analysis
+  generation:
+    - guide_api_and_feature_documentation
+  diagrams:
+    - guide_crate_and_component_granularity
+  qa:
+    - verify_public_api_and_feature_consistency

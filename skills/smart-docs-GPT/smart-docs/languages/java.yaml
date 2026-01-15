@@ -1,0 +1,87 @@
+language: java
+
+detection:
+  file_extensions:
+    - .java
+  config_files:
+    - pom.xml
+    - build.gradle
+    - build.gradle.kts
+    - settings.gradle
+    - settings.gradle.kts
+  signals:
+    - Presence of src/main/java and src/test/java
+    - Maven or Gradle build configuration
+
+build_systems:
+  supported:
+    - Maven
+    - Gradle
+  detection_rules:
+    - pom.xml indicates Maven-based project
+    - build.gradle* indicates Gradle-based project
+
+project_structure:
+  standard_layout:
+    - src/main/java
+    - src/main/resources
+    - src/test/java
+    - src/test/resources
+  conventions:
+    - Packages define namespace and module boundaries
+    - One public class per file (common convention)
+    - Entry points via main methods or framework bootstraps
+
+module_discovery:
+  description: |
+    Identify modules and components based on packages and build configuration.
+  signals:
+    - Top-level package structure
+    - Multi-module Maven or Gradle configuration
+    - Explicit module descriptors (module-info.java)
+  guidelines:
+    - Treat each Maven/Gradle module as a top-level component
+    - Use package hierarchy to infer sub-components
+    - Distinguish API, domain, and infrastructure packages
+
+dependency_analysis:
+  focus:
+    - Inter-module dependencies
+    - External dependencies from repositories
+  sources:
+    - pom.xml dependencies
+    - Gradle dependency blocks
+  considerations:
+    - Dependency scopes (compile, test, runtime)
+    - Optional and provided dependencies
+
+documentation_focus:
+  emphasize:
+    - Module responsibilities
+    - Public APIs and service interfaces
+    - Configuration and runtime behavior
+  de_emphasize:
+    - Boilerplate getters/setters
+    - Generated code
+
+special_considerations:
+  - Annotations and reflection
+  - Dependency injection frameworks (Spring, Jakarta EE)
+  - Configuration via properties or YAML files
+
+depth_handling:
+  guidance:
+    - Start at module and package level
+    - Deep dive into core services or complex subsystems
+
+phase_constraints:
+  discovery:
+    - use_for_language_and_build_detection
+  architecture:
+    - use_for_module_and_package_analysis
+  generation:
+    - guide_service_and_api_documentation
+  diagrams:
+    - guide_component_and_layer_visualization
+  qa:
+    - verify_module_dependency_and_api_consistency

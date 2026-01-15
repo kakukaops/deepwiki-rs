@@ -1,0 +1,108 @@
+language: typescript
+
+detection:
+  file_extensions:
+    - .ts
+    - .tsx
+  config_files:
+    - tsconfig.json
+    - package.json
+  signals:
+    - TypeScript compiler configuration
+    - Presence of type declarations
+
+runtime_and_tooling:
+  runtimes:
+    - Node.js
+    - Deno
+    - Bun
+  package_managers:
+    - npm
+    - yarn
+    - pnpm
+  compilers_and_tools:
+    - tsc
+    - ts-node
+    - swc
+    - esbuild
+    - babel
+
+project_structure:
+  common_layouts:
+    - src/
+    - lib/
+    - server/
+    - client/
+    - types/
+  conventions:
+    - Source code under src/
+    - Separate type definitions when needed
+    - Build output separated from source
+
+module_discovery:
+  description: |
+    Identify modules using file structure, imports, and type boundaries.
+  signals:
+    - import/export statements
+    - tsconfig path mappings
+    - Declaration files (.d.ts)
+  guidelines:
+    - Use TypeScript types and interfaces to define module contracts
+    - Treat path-mapped aliases as logical modules
+    - Distinguish runtime modules from type-only modules
+
+dependency_analysis:
+  focus:
+    - Runtime dependencies
+    - Type-only dependencies
+  sources:
+    - package.json
+    - tsconfig.json
+  considerations:
+    - dependencies vs devDependencies
+    - @types packages
+    - Type-only imports and exports
+
+documentation_focus:
+  emphasize:
+    - Public APIs and exported types
+    - Interface and type definitions
+    - Module contracts and boundaries
+  de_emphasize:
+    - Inferred internal types
+    - Generated declaration files
+
+framework_patterns:
+  frontend:
+    - React with TypeScript (props, hooks typing)
+    - Vue with TypeScript
+    - Angular (native TypeScript usage)
+  backend:
+    - Node.js services with typed APIs
+    - RPC or schema-driven interfaces
+  shared:
+    - Shared type packages
+    - Monorepo type contracts
+
+special_considerations:
+  - Structural typing
+  - Generics and advanced type utilities
+  - Strict vs non-strict compiler modes
+  - Incremental and project references
+
+depth_handling:
+  guidance:
+    - Start from entry modules and exported APIs
+    - Dive into complex type systems only when necessary
+
+phase_constraints:
+  discovery:
+    - detect_typescript_and_compiler_config
+  architecture:
+    - analyze_module_structure_and_type_contracts
+  generation:
+    - document_apis_and_type_definitions
+  diagrams:
+    - visualize_module_and_type_relationships
+  qa:
+    - verify_type_and_dependency_consistency

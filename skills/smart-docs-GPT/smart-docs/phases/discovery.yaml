@@ -1,0 +1,73 @@
+phase: discovery
+purpose: |
+  Understand the project structure, technology stack, and
+  primary entry points before any architectural analysis.
+
+objectives:
+  - Identify project layout and directory structure
+  - Detect programming languages and frameworks
+  - Locate configuration files and build systems
+  - Determine primary entry points
+
+procedures:
+
+  directory_analysis:
+    description: |
+      Analyze the directory tree to understand project organization.
+    recommended_commands:
+      - tree -L 4
+      - find . -type f | head -n 50
+    guidelines:
+      - Focus on top-level directories
+      - Identify src, lib, app, cmd, services, packages
+      - Note separation between code, tests, docs, configs
+
+  file_type_analysis:
+    description: |
+      Identify file types to infer languages and frameworks.
+    considerations:
+      - File extensions
+      - Naming conventions
+      - Presence of lock files or dependency manifests
+
+  configuration_detection:
+    description: |
+      Detect configuration and build-related files.
+    examples:
+      - package.json
+      - pyproject.toml
+      - requirements.txt
+      - Cargo.toml
+      - go.mod
+      - pom.xml
+      - build.gradle
+      - CMakeLists.txt
+      - Makefile
+
+  technology_stack_identification:
+    description: |
+      Infer primary and secondary technologies used in the project.
+    signals:
+      - Dependency definitions
+      - Framework-specific configuration files
+      - Directory naming patterns
+
+  entry_point_identification:
+    description: |
+      Identify application entry points.
+    examples:
+      - main functions
+      - CLI entry scripts
+      - server startup files
+      - framework bootstrap files
+
+analysis_constraints:
+  - do_not_infer_architecture_patterns
+  - do_not_generate_documentation
+  - do_not_create_diagrams
+
+outputs:
+  - detected_languages
+  - build_systems
+  - entry_points
+  - high_level_project_map

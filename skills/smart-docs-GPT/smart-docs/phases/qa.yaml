@@ -1,0 +1,62 @@
+phase: qa
+purpose: |
+  Validate the generated documentation and diagrams for
+  completeness, accuracy, consistency, and usability.
+
+prerequisites:
+  - generation.outputs.project_overview_doc
+  - generation.outputs.architecture_overview_doc
+  - generation.outputs.workflow_overview_doc
+  - generation.outputs.deep_dive_docs
+  - diagrams.outputs.system_context_diagrams
+  - diagrams.outputs.container_diagrams
+  - diagrams.outputs.component_diagrams
+  - diagrams.outputs.workflow_diagrams
+
+objectives:
+  - Ensure documentation is complete and coherent
+  - Verify alignment between text and diagrams
+  - Detect omissions, inconsistencies, or ambiguities
+  - Produce a concise final summary
+
+quality_checks:
+
+  completeness:
+    checklist:
+      - All planned documents are generated
+      - Each document has required sections
+      - Key components and workflows are covered
+
+  consistency:
+    checklist:
+      - Terminology is consistent across documents
+      - Component names match between text and diagrams
+      - Architecture descriptions align with diagrams
+
+  clarity:
+    checklist:
+      - Explanations are clear and concise
+      - No unnecessary duplication
+      - Logical flow between sections
+
+  diagram_validation:
+    checklist:
+      - Diagrams accurately reflect described architecture
+      - Diagrams are readable and not overcrowded
+      - Mermaid syntax renders correctly
+
+finalization:
+  summary_guidelines:
+    - Summarize system purpose and scope
+    - Highlight key architectural decisions
+    - Mention notable constraints or assumptions
+
+qa_constraints:
+  - do_not_introduce_new_features
+  - do_not_change_architecture_decisions
+  - do_not_expand_scope
+
+outputs:
+  - validated_documentation_set
+  - validation_report
+  - final_summary

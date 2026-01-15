@@ -1,0 +1,90 @@
+language: python
+aliases:
+  - py
+
+detection:
+  file_extensions:
+    - .py
+  config_files:
+    - pyproject.toml
+    - setup.py
+    - setup.cfg
+    - requirements.txt
+    - Pipfile
+    - poetry.lock
+  signals:
+    - Presence of __init__.py files
+    - Virtual environment or dependency manifests
+
+build_and_env:
+  tooling:
+    - pip
+    - poetry
+    - pipenv
+    - setuptools
+  environment_indicators:
+    - virtualenv
+    - conda environments
+
+project_structure:
+  common_layouts:
+    - src/ based layout
+    - flat package layout
+    - monorepo with multiple packages
+  conventions:
+    - Packages defined by directories with __init__.py
+    - Entry points via main scripts or console_scripts
+
+module_discovery:
+  description: |
+    Identify packages and modules as primary structural units.
+  signals:
+    - Package directories
+    - Import statements
+    - setup.py / pyproject entry points
+  guidelines:
+    - Treat top-level packages as modules
+    - Distinguish library code from application code
+    - Identify shared utilities vs domain logic
+
+dependency_analysis:
+  focus:
+    - Internal imports
+    - External dependencies
+  sources:
+    - requirements files
+    - pyproject.toml dependencies
+  considerations:
+    - Optional dependencies and extras
+    - Environment-specific dependencies
+
+documentation_focus:
+  emphasize:
+    - Package responsibilities
+    - Public APIs (functions, classes)
+    - Entry points and CLI commands
+  de_emphasize:
+    - Trivial utility functions
+    - Generated files (e.g. migrations)
+
+special_considerations:
+  - Dynamic typing and duck typing
+  - Metaprogramming and decorators
+  - Framework conventions (Django, Flask, FastAPI, etc.)
+
+depth_handling:
+  guidance:
+    - Start with package-level documentation
+    - Deep dive only into complex or critical modules
+
+phase_constraints:
+  discovery:
+    - use_for_language_and_framework_detection
+  architecture:
+    - use_for_package_and_module_analysis
+  generation:
+    - guide_api_and_entry_point_documentation
+  diagrams:
+    - guide_module_level_visualization
+  qa:
+    - verify_import_and_api_consistency

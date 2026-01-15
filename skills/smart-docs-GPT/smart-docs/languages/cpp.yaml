@@ -1,0 +1,99 @@
+language: cpp
+aliases:
+  - c
+  - c++
+
+detection:
+  file_extensions:
+    - .c
+    - .cpp
+    - .cc
+    - .cxx
+    - .h
+    - .hpp
+  config_files:
+    - CMakeLists.txt
+    - Makefile
+    - meson.build
+    - BUILD
+    - BUILD.bazel
+  signals:
+    - Presence of header/source file separation
+    - Build system configuration files
+
+build_systems:
+  supported:
+    - CMake
+    - Make
+    - Meson
+    - Bazel
+  detection_rules:
+    - CMakeLists.txt indicates CMake-based project
+    - Makefile indicates Make-based build
+    - meson.build indicates Meson
+    - BUILD / BUILD.bazel indicates Bazel
+
+project_structure:
+  common_directories:
+    - src
+    - include
+    - lib
+    - tests
+    - examples
+  conventions:
+    - Header files define interfaces
+    - Source files implement logic
+    - Public headers typically under include/
+
+module_discovery:
+  description: |
+    Identify logical modules based on directory structure,
+    namespaces, and build configuration.
+  signals:
+    - CMake targets or Bazel rules
+    - Namespace boundaries
+    - Library targets vs executable targets
+  guidelines:
+    - Treat each library target as a module
+    - Separate core libraries from executables
+    - Distinguish reusable libraries from application code
+
+dependency_analysis:
+  focus:
+    - Inter-library dependencies
+    - External dependencies via package managers
+  external_dependencies:
+    - system libraries
+    - third-party libraries
+    - vendored dependencies
+
+documentation_focus:
+  emphasize:
+    - Public APIs exposed via headers
+    - Module responsibilities
+    - Build and configuration requirements
+  de_emphasize:
+    - Low-level implementation details
+    - Generated code
+
+special_considerations:
+  - Templates and header-only libraries
+  - Platform-specific code paths
+  - Conditional compilation via macros
+
+depth_handling:
+  guidance:
+    - Prefer documenting interfaces over implementations
+    - For large codebases, focus on core libraries first
+
+phase_constraints:
+  discovery:
+    - use_for_language_detection
+  architecture:
+    - use_for_module_and_dependency_analysis
+  generation:
+    - guide_documentation_focus
+  diagrams:
+    - guide_component_granularity
+  qa:
+    - verify_api_consistency
