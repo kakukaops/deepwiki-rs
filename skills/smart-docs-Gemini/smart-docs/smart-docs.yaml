@@ -5,7 +5,7 @@ description: >
   instead of raw code. Supports 8+ languages including Python, Java, C++, Go.
   Generates DeepWiki-style documentation including C4 architecture, API references, and complexity reports.
 
-version: 2.2.0
+version: 2.2.1
 author: "Agent Skill Expert"
 
 allowed_tools:
@@ -42,7 +42,7 @@ instructions: |
   1. **Precision**: Do not guess function signatures. Use the `analyze_code.py` tool.
   2. **Structure**: Follow the C4 model (Context, Container, Component, Code).
   3. **Visuals**: Always include Mermaid diagrams where complex relationships exist.
-  4. **Context Awareness**: You MUST monitor and report your context usage.
+  4. **Context Awareness**: You MUST monitor context usage at every step.
 
   ## Tool Usage
   You have a specialized Python tool located at `tools/analyze_code.py`.
@@ -51,10 +51,10 @@ instructions: |
   **Always use this tool instead of reading raw code files directly**, unless the JSON output is insufficient for understanding business logic.
 
   ## Safety & Reporting Protocol (CRITICAL)
-  1. **Pre-Check**: Before reading any file, check size with `ls -lh`. Limit raw reads to < 50KB.
-  2. **Analyze**: Use `analyze_code.py` for structural extraction.
-  3. **Post-Report**: After every major step, you MUST output a "Context Stats" block:
-     > **Context Stats**: Read [X] bytes (~[Y] tokens). Current context window is [Safe/Risk].
+  1. **Estimate First**: Before reading files, use `ls -lh` to check size.
+  2. **Step-by-Step Reporting**: After EVERY step in a workflow, you must output a stats block:
+     > **Context Check**: Last output ~[X] chars (~[X/4] tokens). Total Context Load: [Safe/Warning/Critical].
+  3. **Emergency Brake**: If Total Context Load is "Critical", stop reading and summarize immediately.
 
   ## Execution
   Start by loading the "discovery" phase instructions from `workflows/phase1_discovery.md`.

@@ -2,55 +2,57 @@
 
 **Objective**: Identify project structure, language, and key entry points.
 
-## Step 1: Scan Directory Structure
-Execute the following to get a high-level overview:
+## Step 0: Context Safety Check
+Before listing files, check the scale of the repository:
 ```bash
-# Get file count to determine scale
-find . -type f | wc -l
-
-# Visual overview (limit depth to avoid context overflow)
-tree -L 3 -I 'node_modules|target|build|dist|vendor|.git|.idea'
+# Check total file count
+find . -type f -not -path '*/.*' | wc -l
 ```
+Decision: If file count > 1000, do NOT use recursive tree without depth limits.
 
+## Step 1: Scan Directory Structure
+
+Use a hybrid approach to see deep structure without token explosion:
+
+1. **Overview (Files & Dirs)**: See immediate root context.
+    ```bash
+    tree -L 2 -I 'node_modules|target|build|dist|vendor|.git|.idea'
+    ```
+    
+2. **Deep Skeleton (Directories Only)**: See the full architectural shape up to 6 levels deep.
+    ```bash
+    # -d: list directories only (very token cheap)
+    tree -d -L 7 -I 'node_modules|target|build|dist|vendor|.git|.idea'
+    ```
+
+**Context Check**: Estimate tokens used by these tree outputs (Chars / 4).
+  
+    
 ## Step 2: Identify Languages & Stack
 
-Look for configuration files to determine the tech stack. Use find or ls patterns:
+Look for configuration files. Use find to locate them regardless of depth:
+```bash
+find . -maxdepth 7 -name "package.json" -o -name "pom.xml" -o -name "go.mod" -o -name "Cargo.toml" -o -name "requirements.txt" -o -name "CMakeLists.txt"
+```
 
-- **Python**: requirements.txt, pyproject.toml, setup.py
-    
-- **JavaScript/TS**: package.json, tsconfig.json
-    
-- **Java**: pom.xml, build.gradle
-    
-- **Go**: go.mod
-    
-- **Rust**: Cargo.toml
-    
-- **C/C++**: CMakeLists.txt, Makefile
-    
+**Context Check**: Estimate tokens used by these tree outputs (Chars / 4).
+
 
 ## Step 3: Locate Entry Points
 
-Identify the main entry points of the application (e.g., main.py, index.js, Application.java).
+**Do NOT rely on the tree output.** Use find to locate potential entry points deeply nested in the structure.
 
-**Output Requirement**:  
-Before moving to Phase 2, summarize:
+**Common Patterns**:
+```bash
+find src -name "main.py" -o -name "index.js" -o -name "Application.java" -o -name "main.go" -o -name "main.rs" -o -name "main.cpp"
+```
 
-1. Primary Language
-    
-2. Build System
-    
-3. Project Scale (Small/Medium/Large)
-    
-4. Key Entry Point Paths
+**Context Check**: Estimate tokens used by these tree outputs (Chars / 4).
+
 
 ## Step 4: Context Usage Report
 
-Before proceeding, estimate the context used by the file lists.
-```bash
-# Estimate token count of the tree output (approx 4 chars = 1 token)
-tree -L 2 -I 'node_modules|target|build|dist|vendor|.git' | wc -c
-```
+Before proceeding, estimate the context used.  
 **Action**: Report "Context Stats: [Bytes] bytes (~[Bytes/4] tokens)" in your summary.
 
 **Output Requirement**:  
@@ -62,6 +64,6 @@ Summarize:
     
 3. Project Scale (Small/Medium/Large)
     
-4. Key Entry Point Paths
+4. Key Entry Point Paths (Full paths found via find)
 
 ---
