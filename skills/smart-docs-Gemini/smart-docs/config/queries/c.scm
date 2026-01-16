@@ -8,3 +8,4 @@
 
 ; 调用
 (call_expression function: (identifier) @reference.call)
+(preproc_include path: (_) @reference.import)

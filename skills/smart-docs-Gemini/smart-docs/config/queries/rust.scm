@@ -9,3 +9,4 @@
 (call_expression function: (field_expression field: (field_identifier) @reference.call))
 ; 宏调用
 (macro_invocation macro: (identifier) @reference.call)
+(use_declaration) @reference.import

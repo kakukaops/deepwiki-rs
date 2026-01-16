@@ -11,3 +11,4 @@
 ; 调用
 (call_expression function: (identifier) @reference.call)
 (call_expression function: (member_expression property: (property_identifier) @reference.call))
+(import_statement source: (string) @reference.import)

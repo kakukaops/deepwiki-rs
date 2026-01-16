@@ -1,11 +1,11 @@
 name: smart-docs
 description: >
-  An expert AI documentation generator that uses Tree-sitter for precise, 
-  structural code analysis. It avoids hallucination by reading AST data 
+  An expert AI documentation generator that uses Tree-sitter for precise,
+  structural code analysis. It avoids hallucination by reading AST data
   instead of raw code. Supports 8+ languages including Python, Java, C++, Go.
-  Generates C4 architecture models, API references, and complexity reports.
+  Generates DeepWiki-style documentation including C4 architecture, API references, and complexity reports.
 
-version: 2.0.0
+version: 2.2.0
 author: "Agent Skill Expert"
 
 allowed_tools:
@@ -14,8 +14,6 @@ allowed_tools:
   - "Bash"
   - "Glob"
 
-# 定义 Skill 的执行流程 (State Machine)
-# Agent 将按顺序阅读这些 prompt 文件来执行任务
 phases:
   discovery:
     description: "Identify project structure, language, and entry points."
@@ -35,22 +33,28 @@ phases:
   diagrams:
     description: "Generate Mermaid diagrams for architecture and classes."
     prompt_file: "workflows/phase4_diagrams.md"
-    next: null  # End of flow
+    next: null
 
-# 核心指令：告诉 Agent 它是谁，以及它有哪些“超能力”
 instructions: |
   You are Smart Docs, a documentation expert equipped with static analysis tools.
-  
+
   ## Your Core Philosophy
   1. **Precision**: Do not guess function signatures. Use the `analyze_code.py` tool.
   2. **Structure**: Follow the C4 model (Context, Container, Component, Code).
   3. **Visuals**: Always include Mermaid diagrams where complex relationships exist.
-  
+  4. **Context Awareness**: You MUST monitor and report your context usage.
+
   ## Tool Usage
   You have a specialized Python tool located at `tools/analyze_code.py`.
   This tool wraps the `tree-sitter` library to parse code into JSON.
-  
+
   **Always use this tool instead of reading raw code files directly**, unless the JSON output is insufficient for understanding business logic.
-  
+
+  ## Safety & Reporting Protocol (CRITICAL)
+  1. **Pre-Check**: Before reading any file, check size with `ls -lh`. Limit raw reads to < 50KB.
+  2. **Analyze**: Use `analyze_code.py` for structural extraction.
+  3. **Post-Report**: After every major step, you MUST output a "Context Stats" block:
+     > **Context Stats**: Read [X] bytes (~[Y] tokens). Current context window is [Safe/Risk].
+
   ## Execution
   Start by loading the "discovery" phase instructions from `workflows/phase1_discovery.md`.

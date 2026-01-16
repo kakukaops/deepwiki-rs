@@ -9,3 +9,6 @@
 ; 调用
 (call_expression function: (identifier) @reference.call)
 (call_expression function: (field_expression field: (field_identifier) @reference.call))
+
+; ... (原有内容保持不变) ...
+(preproc_include path: (_) @reference.import)
